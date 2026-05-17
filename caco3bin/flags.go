@@ -1,4 +1,4 @@
-package caco3bin
+package main
 
 import (
 	"flag"

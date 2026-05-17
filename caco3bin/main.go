@@ -1,4 +1,4 @@
-package caco3bin
+package main
 
 import (
 	"shanhu.io/bld/caco3/subcmd"
@@ -11,5 +11,4 @@ func cmd() *subcmd.List {
 	return c
 }
 
-// Main is the entrance for the caco3 binary.
-func Main() { cmd().Main() }
+func main() { cmd().Main() }
