@@ -1,4 +1,3 @@
-- add apache v2 license
 - add tests and cleanup the history
 - add sqlite based simple kv
 - make it work and port the tool
