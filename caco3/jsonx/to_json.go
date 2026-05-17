@@ -3,7 +3,7 @@ package jsonx
 import (
 	"bytes"
 
-	"shanhu.io/bld/lexing"
+	"shanhu.io/bld/caco3/lexing"
 )
 
 func marshalValue(v value) ([]byte, error) {

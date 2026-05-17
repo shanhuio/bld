@@ -1,7 +1,7 @@
 package caco3bin
 
 import (
-	"shanhu.io/bld/subcmd"
+	"shanhu.io/bld/caco3/subcmd"
 )
 
 func cmd() *subcmd.List {

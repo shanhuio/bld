@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"shanhu.io/bld/lexing"
+	"shanhu.io/bld/caco3/lexing"
 	"shanhu.io/std/docker"
 )
 

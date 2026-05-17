@@ -3,7 +3,7 @@ package jsonx
 import (
 	"strconv"
 
-	"shanhu.io/bld/lexing"
+	"shanhu.io/bld/caco3/lexing"
 )
 
 func parseStringValue(p *parser, t *lexing.Token) string {

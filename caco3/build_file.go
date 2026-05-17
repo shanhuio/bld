@@ -3,8 +3,8 @@ package caco3
 import (
 	"path/filepath"
 
-	"shanhu.io/bld/jsonx"
-	"shanhu.io/bld/lexing"
+	"shanhu.io/bld/caco3/jsonx"
+	"shanhu.io/bld/caco3/lexing"
 )
 
 const buildFileName = "BUILD.caco3"

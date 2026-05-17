@@ -1,7 +1,7 @@
 package jsonx
 
 import (
-	"shanhu.io/bld/lexing"
+	"shanhu.io/bld/caco3/lexing"
 )
 
 // TypeMaker is a function that makes an interface based on the given type.

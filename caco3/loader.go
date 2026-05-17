@@ -6,7 +6,7 @@ import (
 	"os"
 	"sort"
 
-	"shanhu.io/bld/lexing"
+	"shanhu.io/bld/caco3/lexing"
 )
 
 type loader struct {

@@ -3,7 +3,7 @@ package jsonx
 import (
 	"io"
 
-	"shanhu.io/bld/lexing"
+	"shanhu.io/bld/caco3/lexing"
 )
 
 func lexOperator(x *lexing.Lexer, r rune) *lexing.Token {

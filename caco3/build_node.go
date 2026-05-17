@@ -1,7 +1,7 @@
 package caco3
 
 import (
-	"shanhu.io/bld/lexing"
+	"shanhu.io/bld/caco3/lexing"
 )
 
 const (

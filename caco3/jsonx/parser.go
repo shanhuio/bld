@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"shanhu.io/bld/lexing"
+	"shanhu.io/bld/caco3/lexing"
 )
 
 type parser struct {

@@ -8,7 +8,7 @@ import (
 	"io"
 	"os"
 
-	"shanhu.io/bld/lexing"
+	"shanhu.io/bld/caco3/lexing"
 )
 
 // Decoder is a decoder that is capable of parsing a stream.
