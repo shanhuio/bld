@@ -86,7 +86,7 @@ func (lst *List) Run(args []string) int {
 		return -1
 	}
 
-	if c.f != nil {
+	if c.f == nil {
 		fmt.Printf("command %q does nothing\n", name)
 		return 0
 	}
