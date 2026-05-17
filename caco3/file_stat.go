@@ -42,7 +42,7 @@ func newFileStat(env *env, p, t string) (*fileStat, error) {
 	info, err := os.Lstat(f) // Does not follow symlink.
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("%s:%s %s", t, p, errNotFound)
+			return nil, fmt.Errorf("%s:%s %w", t, p, errNotFound)
 		}
 		return nil, err
 	}
