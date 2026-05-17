@@ -7,6 +7,9 @@ import (
 	"sort"
 )
 
+// Func is an entry function of a sub command.
+type Func func(args []string) error
+
 type command struct {
 	name string
 	desc string
