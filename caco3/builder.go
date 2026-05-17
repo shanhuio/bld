@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"shanhu.io/std/docker"
 	"shanhu.io/bld/lexing"
+	"shanhu.io/std/docker"
 )
 
 // Config provide the configuration to start a builder.
