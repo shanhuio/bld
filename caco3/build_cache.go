@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"shanhu.io/bld/timeutil"
+	"shanhu.io/bld/caco3/timeutil"
 )
 
 type buildCache struct {
