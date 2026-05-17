@@ -14,8 +14,6 @@ type ErrorList struct {
 	inJail bool
 }
 
-var _ Logger = new(ErrorList)
-
 // NewErrorList creates a new error list with default (20) maximum
 // lines of errors.
 func NewErrorList() *ErrorList {
@@ -89,9 +87,4 @@ func (lst *ErrorList) Errs() []*Error {
 // SingleErr returns an error array with one error.
 func SingleErr(err error) []*Error {
 	return []*Error{{Err: err}}
-}
-
-// SingleCodeErr returns an error array with one error with ErrorCode.
-func SingleCodeErr(code string, err error) []*Error {
-	return []*Error{{Err: err, Code: code}}
 }

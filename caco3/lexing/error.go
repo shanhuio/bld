@@ -61,17 +61,6 @@ func (e *Error) JSON() interface{} {
 	return ret
 }
 
-// CodeErrorf creates a lex8.Error with ErrCode
-func CodeErrorf(c string, f string, args ...interface{}) *Error {
-	e := fmt.Errorf(f, args...)
-	return &Error{Err: e, Code: c}
-}
-
-// Errorf creates a lex8.Error similar to fmt.Errorf
-func Errorf(f, c string, args ...interface{}) *Error {
-	return CodeErrorf("", f, args...)
-}
-
 // FprintErrs prints a list of errors.
 func FprintErrs(w io.Writer, errs []*Error, workDir string) {
 	for _, err := range errs {
