@@ -8,8 +8,8 @@ import (
 	"sort"
 	"strings"
 
-	"shanhu.io/bld/dock"
-	"shanhu.io/bld/tarutil"
+	"shanhu.io/std/docker"
+	"shanhu.io/std/tarutil"
 )
 
 type dockerBuild struct {
@@ -131,7 +131,7 @@ func (b *dockerBuild) build(env *env, opts *buildOpts) error {
 	}
 	df := string(dockerfileBytes)
 
-	ts := dock.NewTarStream(df)
+	ts := docker.NewTarStream(df)
 	files := make(map[string]string)
 
 	for _, in := range b.inputs {
@@ -229,16 +229,16 @@ func (b *dockerBuild) build(env *env, opts *buildOpts) error {
 	repo, tag := parseRepoTag(b.repoTag)
 	rt := repoTag(repo, tag)
 
-	config := &dock.BuildConfig{
+	config := &docker.BuildConfig{
 		Files:    ts,
 		Args:     b.args,
 		UseCache: true, // TODO(h8liu): read from option.
 	}
-	if err := dock.BuildImageConfig(env.dock, rt, config); err != nil {
+	if err := docker.BuildImageConfig(env.dock, rt, config); err != nil {
 		return err
 	}
 
-	info, err := dock.InspectImage(env.dock, rt)
+	info, err := docker.InspectImage(env.dock, rt)
 	if err != nil {
 		return fmt.Errorf("inspect built image: %w", err)
 	}
@@ -259,7 +259,7 @@ func (b *dockerBuild) build(env *env, opts *buildOpts) error {
 		if err != nil {
 			return fmt.Errorf("prepare tar output: %w", err)
 		}
-		if err := dock.SaveImageGz(env.dock, sum.ID, out); err != nil {
+		if err := docker.SaveImageGz(env.dock, sum.ID, out); err != nil {
 			return fmt.Errorf("save image as tar: %w", err)
 		}
 	}

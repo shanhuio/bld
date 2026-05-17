@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	"shanhu.io/bld/dock"
-	"shanhu.io/bld/tarutil"
+	"shanhu.io/std/docker"
+	"shanhu.io/std/tarutil"
 )
 
 type dockerRun struct {
@@ -93,14 +93,14 @@ func (r *dockerRun) meta(env *env) (*buildRuleMeta, error) {
 }
 
 func (r *dockerRun) build(env *env, opts *buildOpts) error {
-	contConfig := &dock.ContConfig{
+	contConfig := &docker.ContConfig{
 		Cmd:     r.rule.Command,
 		WorkDir: r.rule.WorkDir,
 		Env:     r.envs,
 	}
 
 	if m := r.rule.MountWorkspace; m != "" {
-		contConfig.Mounts = append(contConfig.Mounts, &dock.ContMount{
+		contConfig.Mounts = append(contConfig.Mounts, &docker.ContMount{
 			Host:     env.rootDir,
 			Cont:     m,
 			ReadOnly: true,
@@ -114,7 +114,7 @@ func (r *dockerRun) build(env *env, opts *buildOpts) error {
 
 	c := env.dock
 
-	cont, err := dock.CreateCont(c, img, contConfig)
+	cont, err := docker.CreateCont(c, img, contConfig)
 	if err != nil {
 		return fmt.Errorf("create container: %w", err)
 	}
@@ -173,7 +173,7 @@ func (r *dockerRun) build(env *env, opts *buildOpts) error {
 			}
 		}
 
-		if err := dock.CopyInTarStream(cont, ts, "/"); err != nil {
+		if err := docker.CopyInTarStream(cont, ts, "/"); err != nil {
 			return fmt.Errorf("copy input: %w", err)
 		}
 	}
@@ -185,7 +185,7 @@ func (r *dockerRun) build(env *env, opts *buildOpts) error {
 		return fmt.Errorf("stream logs: %w", err)
 	}
 
-	status, err := cont.Wait(dock.NotRunning)
+	status, err := cont.Wait(docker.NotRunning)
 	if err != nil {
 		return fmt.Errorf("wait container: %w", err)
 	}

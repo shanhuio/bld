@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"shanhu.io/bld/dock"
+	"shanhu.io/std/docker"
 )
 
 type dockerPull struct {
@@ -54,19 +54,19 @@ func (p *dockerPull) pull(env *env) (*dockerSum, error) {
 		pullTag = digest
 	}
 
-	if err := dock.PullImage(env.dock, srcRepo, pullTag); err != nil {
+	if err := docker.PullImage(env.dock, srcRepo, pullTag); err != nil {
 		return nil, fmt.Errorf("pull image: %w", err)
 	}
-	if err := dock.TagImage(env.dock, from, srcRepo, srcTag); err != nil {
+	if err := docker.TagImage(env.dock, from, srcRepo, srcTag); err != nil {
 		return nil, fmt.Errorf("tag image as source: %w", err)
 	}
 	if !(repo == srcRepo && tag == srcTag) {
-		if err := dock.TagImage(env.dock, from, repo, tag); err != nil {
+		if err := docker.TagImage(env.dock, from, repo, tag); err != nil {
 			return nil, fmt.Errorf("re-tag output image: %w", err)
 		}
 	}
 	out := repoTag(repo, tag)
-	info, err := dock.InspectImage(env.dock, out)
+	info, err := docker.InspectImage(env.dock, out)
 	if err != nil {
 		return nil, fmt.Errorf("inspect image: %w", err)
 	}
@@ -119,7 +119,7 @@ func (p *dockerPull) build(env *env, opts *buildOpts) error {
 		if err != nil {
 			return fmt.Errorf("prepare tar output: %w", err)
 		}
-		if err := dock.SaveImageGz(env.dock, sum.ID, out); err != nil {
+		if err := docker.SaveImageGz(env.dock, sum.ID, out); err != nil {
 			return fmt.Errorf("save image as tar: %w", err)
 		}
 	}

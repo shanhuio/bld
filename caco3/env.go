@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"shanhu.io/bld/dock"
+	"shanhu.io/std/docker"
 )
 
 type env struct {
-	dock *dock.Client
+	dock *docker.Client
 
 	rootDir     string
 	workDir     string

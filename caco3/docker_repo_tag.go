@@ -3,11 +3,11 @@ package caco3
 import (
 	"fmt"
 
-	"shanhu.io/bld/dock"
+	"shanhu.io/std/docker"
 )
 
 func parseRepoTag(repoTag string) (string, string) {
-	repo, tag := dock.ParseImageTag(repoTag)
+	repo, tag := docker.ParseImageTag(repoTag)
 	if tag == "" {
 		tag = "latest"
 	}

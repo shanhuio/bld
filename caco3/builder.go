@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"shanhu.io/bld/dock"
+	"shanhu.io/std/docker"
 	"shanhu.io/bld/lexing"
 )
 
@@ -72,7 +72,7 @@ func NewBuilder(workDir string, config *Config) (*Builder, error) {
 	}
 
 	env := &env{
-		dock:        dock.NewUnixClient(""),
+		dock:        docker.NewUnixClient(""),
 		rootDir:     root,
 		workDir:     workDir,
 		workSrcPath: workSrcPath,

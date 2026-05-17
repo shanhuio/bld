@@ -3,7 +3,7 @@ package caco3
 import (
 	"fmt"
 
-	"shanhu.io/bld/dock"
+	"shanhu.io/std/docker"
 	"shanhu.io/bld/httputil"
 )
 
@@ -46,7 +46,7 @@ func checkSameBuilt(env *env, b *built) (bool, error) {
 
 	for _, d := range b.Dockers {
 		repoTag := repoTag(d.Repo, d.Tag)
-		info, err := dock.InspectImage(env.dock, repoTag)
+		info, err := docker.InspectImage(env.dock, repoTag)
 		if err != nil {
 			if httputil.IsNotFound(err) {
 				return false, nil // Image not found.
