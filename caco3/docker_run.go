@@ -67,7 +67,7 @@ func newDockerRun(_ *env, p string, r *DockerRun) *dockerRun {
 		deps:    deps,
 		outs:    outs,
 		outMap:  outMap,
-		envs:    makeDockerVars(r.Envs),
+		envs:    makeDockerVars(r.Envs, nil),
 	}
 }
 

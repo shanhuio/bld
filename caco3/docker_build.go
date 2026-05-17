@@ -51,7 +51,7 @@ func newDockerBuild(env *env, p string, r *DockerBuild) (
 		return nil, fmt.Errorf("invalid name for docker build: %w", err)
 	}
 
-	args := makeDockerVars(r.Args)
+	args := makeDockerVars(r.Args, nil)
 
 	inputMap := make(map[string]bool)
 	for _, input := range r.Input {

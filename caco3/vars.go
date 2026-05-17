@@ -5,7 +5,13 @@ import (
 	"strings"
 )
 
-func makeDockerVars(envs []string) map[string]string {
+func makeDockerVars(
+	envs []string, lookupEnv func(string) (string, bool),
+) map[string]string {
+	if lookupEnv == nil {
+		lookupEnv = os.LookupEnv
+	}
+
 	m := make(map[string]string)
 
 	for _, envVar := range envs {
@@ -15,7 +21,7 @@ func makeDockerVars(envs []string) map[string]string {
 			continue
 		}
 
-		v, ok := os.LookupEnv(envVar)
+		v, ok := lookupEnv(envVar)
 		if ok {
 			m[envVar] = v
 		}
