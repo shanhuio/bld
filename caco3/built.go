@@ -3,8 +3,8 @@ package caco3
 import (
 	"fmt"
 
-	"shanhu.io/bld/httputil"
 	"shanhu.io/std/docker"
+	"shanhu.io/std/errcode"
 )
 
 type built struct {
@@ -48,7 +48,7 @@ func checkSameBuilt(env *env, b *built) (bool, error) {
 		repoTag := repoTag(d.Repo, d.Tag)
 		info, err := docker.InspectImage(env.dock, repoTag)
 		if err != nil {
-			if httputil.IsNotFound(err) {
+			if errcode.IsNotFound(err) {
 				return false, nil // Image not found.
 			}
 			return false, fmt.Errorf("inspect docker %s: %w", repoTag, err)
