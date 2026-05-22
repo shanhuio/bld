@@ -6,5 +6,5 @@ golang.org/x/sync v0.20.0 h1:e0PTpb7pjO8GAtTs2dQ6jYa5BWYlMuX047Dco/pItO4=
 golang.org/x/sync v0.20.0/go.mod h1:9xrNwdLfx4jkKbNva9FpL6vEN7evnE43NNNJQ2LF3+0=
 golang.org/x/tools v0.45.0 h1:18qN3FAooORvApf5XjCXgsuayZOEtXf6JK18I3+ONa8=
 golang.org/x/tools v0.45.0/go.mod h1:LuUGqqaXcXMEFEruIVJVm5mgDD8vww/z/SR1gQ4uE/0=
-shanhu.io/std v0.0.0-20260519054104-d9c0ee4a3f91 h1:iLNeXt2TlN1Hj4yNQ3QHDItJu1jY+LbP2Kpy5SFVJtw=
-shanhu.io/std v0.0.0-20260519054104-d9c0ee4a3f91/go.mod h1:ChNjlsdqymcyH5ASs7B1be40SGLIE6PYFUCmHLh5urE=
+shanhu.io/std v0.0.0-20260522063847-6e8e52d979ee h1:423QR8QYf36lU+IHhLPUeQyVcgDl9fSWLT7vifkThHA=
+shanhu.io/std v0.0.0-20260522063847-6e8e52d979ee/go.mod h1:ChNjlsdqymcyH5ASs7B1be40SGLIE6PYFUCmHLh5urE=
