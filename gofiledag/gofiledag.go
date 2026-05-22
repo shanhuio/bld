@@ -11,6 +11,34 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+// AnalyzePasses runs Analyze on each pass and returns the results in a
+// stable (PkgPath, Kind) order. When a production pass has violations or is
+// skipped, its sibling with-tests pass is omitted so that the same issue is
+// not reported twice (the with-tests pass is a strict superset).
+func AnalyzePasses(passes []*Pass) []*Result {
+	sorted := append([]*Pass(nil), passes...)
+	sort.SliceStable(sorted, func(i, j int) bool {
+		a, b := sorted[i], sorted[j]
+		if a.Pkg.PkgPath != b.Pkg.PkgPath {
+			return a.Pkg.PkgPath < b.Pkg.PkgPath
+		}
+		return a.Kind < b.Kind
+	})
+	skipWithTests := make(map[string]bool)
+	results := make([]*Result, 0, len(sorted))
+	for _, p := range sorted {
+		if p.Kind == PassInternalTest && skipWithTests[p.Pkg.PkgPath] {
+			continue
+		}
+		r := Analyze(p)
+		results = append(results, r)
+		if p.Kind == PassProd && (r.Skipped != "" || len(r.Violations) > 0) {
+			skipWithTests[p.Pkg.PkgPath] = true
+		}
+	}
+	return results
+}
+
 // Analyze runs all checks on a pass.
 func Analyze(p *Pass) *Result {
 	r := &Result{Pass: p, Pkg: p.Pkg}

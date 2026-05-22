@@ -182,6 +182,62 @@ func TestPrintCheckResultsSkipped(t *testing.T) {
 	}
 }
 
+func TestAnalyzePassesSkipsWithTestsWhenProdFails(t *testing.T) {
+	passes := loadFixture(t, "cyclicwithtest")
+
+	// Sanity: the loader should produce both a production and a with-tests
+	// pass for this fixture.
+	var hasProd, hasWithTests bool
+	for _, p := range passes {
+		switch p.Kind {
+		case PassProd:
+			hasProd = true
+		case PassInternalTest:
+			hasWithTests = true
+		}
+	}
+	if !hasProd || !hasWithTests {
+		t.Fatalf("loader produced prod=%v with-tests=%v", hasProd, hasWithTests)
+	}
+
+	results := AnalyzePasses(passes)
+	prodCount, withTestsCount := 0, 0
+	for _, r := range results {
+		switch r.Pass.Kind {
+		case PassProd:
+			prodCount++
+			if len(r.Violations) == 0 {
+				t.Errorf("prod pass should have a cycle violation")
+			}
+		case PassInternalTest:
+			withTestsCount++
+		}
+	}
+	if prodCount != 1 {
+		t.Errorf("got %d prod results, want 1", prodCount)
+	}
+	if withTestsCount != 0 {
+		t.Errorf("got %d with-tests results, want 0 (should be deduped)", withTestsCount)
+	}
+}
+
+func TestAnalyzePassesKeepsWithTestsWhenProdClean(t *testing.T) {
+	results := AnalyzePasses(loadFixture(t, "withtests"))
+	var hasProd, hasWithTests bool
+	for _, r := range results {
+		switch r.Pass.Kind {
+		case PassProd:
+			hasProd = true
+		case PassInternalTest:
+			hasWithTests = true
+		}
+	}
+	if !hasProd || !hasWithTests {
+		t.Errorf("expected both passes when prod is clean; got prod=%v with-tests=%v",
+			hasProd, hasWithTests)
+	}
+}
+
 // findFile returns the full path in files whose basename matches name.
 func findFile(files []string, name string) string {
 	for _, f := range files {

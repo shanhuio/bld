@@ -72,10 +72,7 @@ func run(args []string, graphMode bool) int {
 
 	cwd, _ := os.Getwd()
 
-	results := make([]*gofiledag.Result, 0, len(passes))
-	for _, p := range passes {
-		results = append(results, gofiledag.Analyze(p))
-	}
+	results := gofiledag.AnalyzePasses(passes)
 
 	var fails int
 	if graphMode {
