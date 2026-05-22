@@ -1,4 +1,4 @@
-package filedag
+package gofiledag
 
 import (
 	"go/ast"

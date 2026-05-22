@@ -6,7 +6,7 @@ import (
 	"os"
 	"runtime"
 
-	"shanhu.io/bld/gofiledag/filedag"
+	"shanhu.io/bld/gofiledag"
 )
 
 const usage = `usage: gofiledag <command> [flags] [packages...]
@@ -56,7 +56,7 @@ func run(args []string, graphMode bool) int {
 		patterns = []string{"./..."}
 	}
 
-	cfg := &filedag.LoadConfig{
+	cfg := &gofiledag.LoadConfig{
 		GOOS:   *goos,
 		GOARCH: *goarch,
 	}
@@ -64,7 +64,7 @@ func run(args []string, graphMode bool) int {
 		cfg.Tags = []string{*tags}
 	}
 
-	passes, err := filedag.LoadPasses(cfg, patterns)
+	passes, err := gofiledag.LoadPasses(cfg, patterns)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "load:", err)
 		return 1
@@ -72,16 +72,16 @@ func run(args []string, graphMode bool) int {
 
 	cwd, _ := os.Getwd()
 
-	results := make([]*filedag.Result, 0, len(passes))
+	results := make([]*gofiledag.Result, 0, len(passes))
 	for _, p := range passes {
-		results = append(results, filedag.Analyze(p))
+		results = append(results, gofiledag.Analyze(p))
 	}
 
 	var fails int
 	if graphMode {
-		fails = filedag.PrintGraphResults(os.Stdout, results, cwd)
+		fails = gofiledag.PrintGraphResults(os.Stdout, results, cwd)
 	} else {
-		fails = filedag.PrintCheckResults(os.Stdout, results, cwd)
+		fails = gofiledag.PrintCheckResults(os.Stdout, results, cwd)
 	}
 	if fails > 0 {
 		return 1
