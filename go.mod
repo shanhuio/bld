@@ -4,7 +4,7 @@ go 1.26.3
 
 require (
 	golang.org/x/tools v0.45.0
-	shanhu.io/std v0.0.0-20260522063847-6e8e52d979ee
+	shanhu.io/std v0.0.0-20260522234154-3c5dede83906
 )
 
 require (
