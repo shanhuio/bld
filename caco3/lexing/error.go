@@ -41,7 +41,7 @@ func (e *Error) ErrorRelFile(workDir string) string {
 }
 
 // JSON returns a JSON marshable object of the error.
-func (e *Error) JSON() interface{} {
+func (e *Error) JSON() any {
 	var ret struct {
 		File string `json:"file"`
 		Line int    `json:"line"`

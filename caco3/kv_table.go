@@ -12,13 +12,13 @@ func openKVTable(f string) (*kvTable, error) {
 	return &kvTable{}, nil
 }
 
-func (t *kvTable) replace(k string, v interface{}) error {
+func (t *kvTable) replace(k string, v any) error {
 	return nil
 }
 
 var errKeyNotFound = errors.New("key not found")
 
-func (t *kvTable) get(k string, v interface{}) error {
+func (t *kvTable) get(k string, v any) error {
 	return errKeyNotFound
 }
 

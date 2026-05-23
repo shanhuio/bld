@@ -9,7 +9,7 @@ import (
 
 const buildFileName = "BUILD.caco3"
 
-func makeBuildFileNode(t string) interface{} {
+func makeBuildFileNode(t string) any {
 	switch t {
 	case ruleFileSet:
 		return new(FileSet)

@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func readJSONFile(file string, obj interface{}) error {
+func readJSONFile(file string, obj any) error {
 	bs, err := os.ReadFile(file)
 	if err != nil {
 		return err
@@ -13,7 +13,7 @@ func readJSONFile(file string, obj interface{}) error {
 	return json.Unmarshal(bs, obj)
 }
 
-func writeJSONFile(file string, obj interface{}) error {
+func writeJSONFile(file string, obj any) error {
 	bs, err := json.Marshal(obj)
 	if err != nil {
 		return err
