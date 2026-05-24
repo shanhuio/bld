@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"time"
-
-	"shanhu.io/bld/caco3/timeutil"
 )
 
 type buildCache struct {
@@ -27,17 +25,17 @@ func newBuildCache(f string) (*buildCache, error) {
 }
 
 type buildCacheEntry struct {
-	Key        string              `json:"K"`
-	CreateTime *timeutil.Timestamp `json:"T"`
-	Built      *built              `json:"B"`
+	Key        string     `json:"K"`
+	CreateTime *timestamp `json:"T"`
+	Built      *built     `json:"B"`
 }
 
 func (c *buildCache) put(k string, out *built) error {
-	t := timeutil.ReadTime(c.clock)
+	t := readTime(c.clock)
 	entry := &buildCacheEntry{
 		Key:        k,
 		Built:      out,
-		CreateTime: timeutil.NewTimestamp(t),
+		CreateTime: newTimestamp(t),
 	}
 	return c.cache.replace(k, entry)
 }
@@ -53,8 +51,8 @@ func (c *buildCache) get(k string) (*built, error) {
 		return nil, fmt.Errorf("get from cache: %w", err)
 	}
 
-	now := timeutil.ReadTime(c.clock)
-	expire := timeutil.Time(entry.CreateTime).Add(c.expire)
+	now := readTime(c.clock)
+	expire := entry.CreateTime.toTime().Add(c.expire)
 	if now.Before(expire) {
 		return entry.Built, nil
 	}
