@@ -8,7 +8,15 @@ import (
 // Workspace is the structure of the build.jsonx file. It specifies how
 // to build a project.
 type Workspace struct {
+	Repo    *Repo
 	RepoMap *RepoMap
+}
+
+// Repo identifies the current repo when WORKSPACE.caco3 lives at the root
+// of a single-repo workspace. When set, caco3 builds the repo's own rules
+// directly and resolves cross-repo dependencies under _/src.
+type Repo struct {
+	Name string
 }
 
 // GitRemote defines a set of remote URLs for a given name. It provides a more
@@ -28,6 +36,8 @@ type RepoMap struct {
 func readWorkspace(f string) (*Workspace, []*lexing.Error) {
 	tm := func(t string) any {
 		switch t {
+		case "repo":
+			return new(Repo)
 		case "repo_map":
 			return new(RepoMap)
 		}
@@ -41,6 +51,8 @@ func readWorkspace(f string) (*Workspace, []*lexing.Error) {
 	ws := new(Workspace)
 	for _, entry := range entries {
 		switch v := entry.V.(type) {
+		case *Repo:
+			ws.Repo = v
 		case *RepoMap:
 			ws.RepoMap = v
 		}
