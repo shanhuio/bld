@@ -47,11 +47,12 @@ func listRemotes(dir string) (map[string]*gitRemote, error) {
 				}
 				remotes[name] = remote
 			}
-			if method == "(fetch)" {
+			switch method {
+			case "(fetch)":
 				remote.fetch = true
-			} else if method == "(push)" {
+			case "(push)":
 				remote.push = true
-			} else {
+			default:
 				log.Printf("unknown git remote method: %q", line)
 			}
 		} else {
