@@ -23,10 +23,3 @@ type buildNode struct {
 
 	sub *subBuilds
 }
-
-func (n *buildNode) mainOut() string {
-	if m := n.ruleMeta; m != nil && len(m.outs) > 0 {
-		return m.outs[0]
-	}
-	return ""
-}
