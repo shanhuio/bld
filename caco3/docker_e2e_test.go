@@ -251,3 +251,85 @@ docker_run {
 const singleRepoDockerfile = `FROM test.local/standalone/alpine:latest
 COPY payload.txt /payload.txt
 `
+
+// TestE2ESingleRepoWithDep exercises Stage 3 of single-repo mode: the
+// workspace's self repo (test.local/proj2/dockers) declares one external
+// dependency (test.local/proj1/dockers), pre-checked-out under _/src.
+// The dep provides docker_pull alpine; the self repo's docker_build app
+// references it via an absolute "From" path; docker_run smoke/verify
+// chain on top.
+func TestE2ESingleRepoWithDep(t *testing.T) {
+	requireDocker(t)
+
+	dockerRmiTags(e2eTags...)
+	t.Cleanup(func() { dockerRmiTags(e2eTags...) })
+
+	root := t.TempDir()
+
+	writeFile(t,
+		filepath.Join(root, "WORKSPACE.caco3"), singleRepoWithDepWorkspace,
+	)
+	// Self-repo files at the repo root.
+	writeFile(t, filepath.Join(root, "BUILD.caco3"), e2eProj2Build)
+	writeFile(t, filepath.Join(root, "app/Dockerfile"), e2eAppDockerfile)
+	writeFile(t, filepath.Join(root, "payload.txt"), "hello from caco3\n")
+	// Dependency pre-checked-out under _/src.
+	writeFile(t,
+		filepath.Join(root, "_/src/test.local/proj1/dockers/BUILD.caco3"),
+		e2eProj1Build,
+	)
+
+	b, err := NewBuilder(root, &Config{Root: root, AlwaysRebuild: true})
+	if err != nil {
+		t.Fatalf("NewBuilder: %v", err)
+	}
+	if _, errs := b.ReadWorkspace(); errs != nil {
+		for _, e := range errs {
+			t.Error(e)
+		}
+		t.FailNow()
+	}
+
+	// "verify" resolves to test.local/proj2/dockers/verify via workSrcPath.
+	if errs := b.Build([]string{"verify"}); errs != nil {
+		for _, e := range errs {
+			t.Error(e)
+		}
+		t.FailNow()
+	}
+
+	outDir := filepath.Join(root, "_/out/test.local/proj2/dockers")
+
+	bs, err := os.ReadFile(filepath.Join(outDir, "result.txt"))
+	if err != nil {
+		t.Fatalf("read smoke output: %v", err)
+	}
+	if got, want := string(bs), "hello from caco3\n"; got != want {
+		t.Errorf("smoke output = %q, want %q", got, want)
+	}
+
+	bs, err = os.ReadFile(filepath.Join(outDir, "verified.txt"))
+	if err != nil {
+		t.Fatalf("read verify output: %v", err)
+	}
+	if got, want := string(bs), "hello from caco3\n"; got != want {
+		t.Errorf("verify output = %q, want %q", got, want)
+	}
+
+	if err := exec.Command(
+		"docker", "image", "inspect", "test.local/proj2/app:latest",
+	).Run(); err != nil {
+		t.Errorf("docker image inspect on built image: %v", err)
+	}
+}
+
+const singleRepoWithDepWorkspace = `repo {
+    Name: "test.local/proj2/dockers",
+}
+
+repo_map {
+    Src: {
+        "test.local/proj1/dockers": "",
+    },
+}
+`
