@@ -6,6 +6,40 @@ import (
 	"testing"
 )
 
+func TestPathUnder(t *testing.T) {
+	sep := string(filepath.Separator)
+	base := filepath.Join("/", "a", "b")
+	inside := filepath.Join(base, "c")
+	deeper := filepath.Join(base, "c", "d")
+	sibling := filepath.Join("/", "a", "bxyz")
+	parent := filepath.Join("/", "a")
+	unrelated := filepath.Join("/", "x")
+
+	for _, c := range []struct {
+		name     string
+		base     string
+		physical string
+		wantRel  string
+		wantOK   bool
+	}{
+		{"empty base", "", inside, "", false},
+		{"equal paths", base, base, "", true},
+		{"one level under", base, inside, "c", true},
+		{"two levels under", base, deeper, "c" + sep + "d", true},
+		{"boundary not crossed", base, sibling, "", false},
+		{"physical is parent", base, parent, "", false},
+		{"unrelated", base, unrelated, "", false},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			gotRel, gotOK := pathUnder(c.base, c.physical)
+			if gotRel != c.wantRel || gotOK != c.wantOK {
+				t.Errorf("pathUnder(%q, %q) = (%q, %v), want (%q, %v)",
+					c.base, c.physical, gotRel, gotOK, c.wantRel, c.wantOK)
+			}
+		})
+	}
+}
+
 func TestIsRegularFile(t *testing.T) {
 	dir := t.TempDir()
 	file := filepath.Join(dir, "f.txt")
