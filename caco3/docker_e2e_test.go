@@ -75,7 +75,10 @@ func TestE2EBuildAndRun(t *testing.T) {
 		t.FailNow()
 	}
 
-	targets := []string{"test.local/proj2/dockers/smoke"}
+	// Building verify pulls smoke in transitively (verify depends on
+	// smoke's result.txt output), which in turn pulls in app and
+	// alpine.
+	targets := []string{"test.local/proj2/dockers/verify"}
 	if errs := b.Build(targets); errs != nil {
 		for _, e := range errs {
 			t.Error(e)
@@ -83,14 +86,24 @@ func TestE2EBuildAndRun(t *testing.T) {
 		t.FailNow()
 	}
 
-	// docker_run wrote /result.txt into out/test.local/proj2/dockers/result.txt.
-	out := filepath.Join(root, "out/test.local/proj2/dockers/result.txt")
-	bs, err := os.ReadFile(out)
+	outDir := filepath.Join(root, "out/test.local/proj2/dockers")
+
+	// smoke wrote /result.txt out of the first container.
+	bs, err := os.ReadFile(filepath.Join(outDir, "result.txt"))
 	if err != nil {
-		t.Fatalf("read run output: %v", err)
+		t.Fatalf("read smoke output: %v", err)
 	}
 	if got, want := string(bs), "hello from caco3\n"; got != want {
-		t.Errorf("run output = %q, want %q", got, want)
+		t.Errorf("smoke output = %q, want %q", got, want)
+	}
+
+	// verify consumed smoke's result.txt as input and re-emitted it.
+	bs, err = os.ReadFile(filepath.Join(outDir, "verified.txt"))
+	if err != nil {
+		t.Fatalf("read verify output: %v", err)
+	}
+	if got, want := string(bs), "hello from caco3\n"; got != want {
+		t.Errorf("verify output = %q, want %q", got, want)
 	}
 
 	// The built image must exist locally.
@@ -128,6 +141,18 @@ docker_run {
     Command: ["sh", "-c", "cat /payload.txt > /result.txt"],
     Output: {
         "result.txt": "/result.txt",
+    },
+}
+
+docker_run {
+    Name: "verify",
+    Image: "app",
+    Input: {
+        "result.txt": "/in.txt",
+    },
+    Command: ["sh", "-c", "cat /in.txt > /verified.txt"],
+    Output: {
+        "verified.txt": "/verified.txt",
     },
 }
 `
