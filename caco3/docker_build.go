@@ -46,7 +46,7 @@ func newDockerBuild(env *env, p string, r *DockerBuild) (
 		}
 	}
 
-	repoTag, err := env.nameToRepoTag(name)
+	repoTag, err := nameToRepoTag(name)
 	if err != nil {
 		return nil, fmt.Errorf("invalid name for docker build: %w", err)
 	}

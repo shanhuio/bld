@@ -107,7 +107,7 @@ func (r *dockerRun) build(env *env, opts *buildOpts) error {
 		})
 	}
 
-	img, err := env.nameToRepoTag(r.image)
+	img, err := nameToRepoTag(r.image)
 	if err != nil {
 		return fmt.Errorf("map image name: %w", err)
 	}

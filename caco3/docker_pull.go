@@ -18,7 +18,7 @@ type dockerPull struct {
 
 func newDockerPull(env *env, p string, r *DockerPull) (*dockerPull, error) {
 	name := makeRelPath(p, r.Name)
-	repoTag, err := env.nameToRepoTag(name)
+	repoTag, err := nameToRepoTag(name)
 	if err != nil {
 		return nil, fmt.Errorf("invalid docker pull name: %w", err)
 	}
