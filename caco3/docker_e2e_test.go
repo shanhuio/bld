@@ -114,49 +114,53 @@ func TestE2EBuildAndRun(t *testing.T) {
 	}
 }
 
-const e2eWorkspace = `repo_map {
-    Src: {
-        "test.local/proj1/dockers": "",
-        "test.local/proj2/dockers": "",
-    },
-}
-`
+var e2eWorkspace = multiLine(
+	`repo_map {`,
+	`    Src: {`,
+	`        "test.local/proj1/dockers": "",`,
+	`        "test.local/proj2/dockers": "",`,
+	`    },`,
+	`}`,
+)
 
-const e2eProj1Build = `docker_pull {
-    Name: "alpine",
-    Pull: "alpine:3.23",
-}
-`
+var e2eProj1Build = multiLine(
+	`docker_pull {`,
+	`    Name: "alpine",`,
+	`    Pull: "alpine:3.23",`,
+	`}`,
+)
 
-const e2eProj2Build = `docker_build {
-    Name: "app",
-    From: ["/test.local/proj1/dockers/alpine"],
-    Input: ["payload.txt"],
-    PrefixDir: ".",
-}
+var e2eProj2Build = multiLine(
+	`docker_build {`,
+	`    Name: "app",`,
+	`    From: ["/test.local/proj1/dockers/alpine"],`,
+	`    Input: ["payload.txt"],`,
+	`    PrefixDir: ".",`,
+	`}`,
+	``,
+	`docker_run {`,
+	`    Name: "smoke",`,
+	`    Image: "app",`,
+	`    Command: ["sh", "-c", "cat /payload.txt > /result.txt"],`,
+	`    Output: {`,
+	`        "result.txt": "/result.txt",`,
+	`    },`,
+	`}`,
+	``,
+	`docker_run {`,
+	`    Name: "verify",`,
+	`    Image: "app",`,
+	`    Input: {`,
+	`        "result.txt": "/in.txt",`,
+	`    },`,
+	`    Command: ["sh", "-c", "cat /in.txt > /verified.txt"],`,
+	`    Output: {`,
+	`        "verified.txt": "/verified.txt",`,
+	`    },`,
+	`}`,
+)
 
-docker_run {
-    Name: "smoke",
-    Image: "app",
-    Command: ["sh", "-c", "cat /payload.txt > /result.txt"],
-    Output: {
-        "result.txt": "/result.txt",
-    },
-}
-
-docker_run {
-    Name: "verify",
-    Image: "app",
-    Input: {
-        "result.txt": "/in.txt",
-    },
-    Command: ["sh", "-c", "cat /in.txt > /verified.txt"],
-    Output: {
-        "verified.txt": "/verified.txt",
-    },
-}
-`
-
-const e2eAppDockerfile = `FROM test.local/proj1/alpine:latest
-COPY payload.txt /payload.txt
-`
+var e2eAppDockerfile = multiLine(
+	`FROM test.local/proj1/alpine:latest`,
+	`COPY payload.txt /payload.txt`,
+)
