@@ -8,7 +8,6 @@ const (
 	nodeSrc  = "src"
 	nodeRule = "rule"
 	nodeOut  = "out"
-	nodeRun  = "run"
 	nodeSub  = "sub"
 )
 
