@@ -68,6 +68,29 @@ func TestReadWorkspaceWithRepo(t *testing.T) {
 	}
 }
 
+func TestReadWorkspaceEmptyRepoName(t *testing.T) {
+	root := t.TempDir()
+	src := multiLine(
+		`repo {`,
+		`    Name: "",`,
+		`}`,
+	)
+	if err := os.WriteFile(
+		filepath.Join(root, "WORKSPACE.caco3"), []byte(src), 0644,
+	); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+
+	b, err := NewBuilder(root, &Config{Root: root})
+	if err != nil {
+		t.Fatalf("NewBuilder: %v", err)
+	}
+	_, errs := b.ReadWorkspace()
+	if errs == nil {
+		t.Fatal("ReadWorkspace: want error for empty repo.Name, got nil")
+	}
+}
+
 func TestReadWorkspaceRepoOnly(t *testing.T) {
 	dir := t.TempDir()
 	f := filepath.Join(dir, "WORKSPACE.caco3")

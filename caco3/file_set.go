@@ -123,16 +123,15 @@ func newFileSet(env *env, p string, r *FileSet) (*fileSet, error) {
 		}
 
 		for _, match := range matches {
-			rel, err := filepath.Rel(env.srcDir, match)
+			name, err := env.srcName(match)
 			if err != nil {
 				return nil, fmt.Errorf(
-					"get relative path for %q: %w", match, err,
+					"resolve %q: %w", match, err,
 				)
 			}
-			if ignore(rel) {
+			if ignore(name) {
 				continue
 			}
-			name := filepath.ToSlash(rel)
 			m[name] = true
 		}
 	}

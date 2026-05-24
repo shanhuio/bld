@@ -160,3 +160,94 @@ docker_run {
 const e2eAppDockerfile = `FROM test.local/proj1/alpine:latest
 COPY payload.txt /payload.txt
 `
+
+// e2eSingleRepoTags are the local image tags TestE2ESingleRepoNoDeps creates.
+var e2eSingleRepoTags = []string{
+	"test.local/standalone/alpine:latest",
+	"test.local/standalone/hello:latest",
+}
+
+// TestE2ESingleRepoNoDeps exercises Stage 2 of single-repo mode: the
+// workspace declares a `repo` block, has no external dependencies, and
+// builds its own rules entirely out of files at the repo root. All
+// outputs land under _/out.
+func TestE2ESingleRepoNoDeps(t *testing.T) {
+	requireDocker(t)
+
+	dockerRmiTags(e2eSingleRepoTags...)
+	t.Cleanup(func() { dockerRmiTags(e2eSingleRepoTags...) })
+
+	root := t.TempDir()
+	writeFile(t, filepath.Join(root, "WORKSPACE.caco3"), singleRepoWorkspace)
+	writeFile(t, filepath.Join(root, "BUILD.caco3"), singleRepoBuild)
+	writeFile(t, filepath.Join(root, "hello/Dockerfile"), singleRepoDockerfile)
+	writeFile(t, filepath.Join(root, "payload.txt"), "single-repo says hi\n")
+
+	b, err := NewBuilder(root, &Config{Root: root, AlwaysRebuild: true})
+	if err != nil {
+		t.Fatalf("NewBuilder: %v", err)
+	}
+	if _, errs := b.ReadWorkspace(); errs != nil {
+		for _, e := range errs {
+			t.Error(e)
+		}
+		t.FailNow()
+	}
+
+	// workSrcPath should resolve "smoke" to the full single-repo name.
+	targets := []string{"smoke"}
+	if errs := b.Build(targets); errs != nil {
+		for _, e := range errs {
+			t.Error(e)
+		}
+		t.FailNow()
+	}
+
+	outFile := filepath.Join(
+		root, "_/out/test.local/standalone/dockers/result.txt",
+	)
+	bs, err := os.ReadFile(outFile)
+	if err != nil {
+		t.Fatalf("read smoke output: %v", err)
+	}
+	if got, want := string(bs), "single-repo says hi\n"; got != want {
+		t.Errorf("output = %q, want %q", got, want)
+	}
+
+	if err := exec.Command(
+		"docker", "image", "inspect", "test.local/standalone/hello:latest",
+	).Run(); err != nil {
+		t.Errorf("docker image inspect on built image: %v", err)
+	}
+}
+
+const singleRepoWorkspace = `repo {
+    Name: "test.local/standalone/dockers",
+}
+`
+
+const singleRepoBuild = `docker_pull {
+    Name: "alpine",
+    Pull: "alpine:3.23",
+}
+
+docker_build {
+    Name: "hello",
+    From: ["alpine"],
+    Input: ["payload.txt"],
+    PrefixDir: ".",
+}
+
+docker_run {
+    Name: "smoke",
+    Image: "hello",
+    Command: ["sh", "-c", "cat /payload.txt > /result.txt"],
+    Output: {
+        "result.txt": "/result.txt",
+    },
+}
+`
+
+const singleRepoDockerfile = `FROM test.local/standalone/alpine:latest
+COPY payload.txt /payload.txt
+`

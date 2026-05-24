@@ -93,6 +93,10 @@ func NewBuilder(workDir string, config *Config) (*Builder, error) {
 }
 
 // ReadWorkspace reads and loads the WORKSPACE file into the build env.
+// When the workspace declares a `repo` node, the env is switched into
+// single-repo mode: srcDir / outDir move under _/src and _/out, and
+// the env learns to redirect paths under the self-repo name back to
+// the workspace root.
 func (b *Builder) ReadWorkspace() (*Workspace, []*lexing.Error) {
 	if b.env.workspace != nil {
 		return b.env.workspace, nil
@@ -103,6 +107,17 @@ func (b *Builder) ReadWorkspace() (*Workspace, []*lexing.Error) {
 		return nil, errs
 	}
 	b.env.workspace = ws
+
+	if ws.Repo != nil {
+		if ws.Repo.Name == "" {
+			return nil, lexing.SingleErr(
+				errors.New("repo.Name must not be empty"),
+			)
+		}
+		if err := b.env.setupSingleRepo(ws.Repo.Name); err != nil {
+			return nil, lexing.SingleErr(err)
+		}
+	}
 	return ws, nil
 }
 

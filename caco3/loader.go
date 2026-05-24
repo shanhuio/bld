@@ -162,12 +162,21 @@ func loadNodes(env *env, names []string) (
 	l := newLoader(env)
 
 	repoMap := env.workspace.RepoMap
-	if repoMap == nil || len(repoMap.Src) == 0 {
-		err := errors.New("repo map missing")
+	dirSet := make(map[string]bool)
+	if repoMap != nil {
+		for dir := range repoMap.Src {
+			dirSet[dir] = true
+		}
+	}
+	if env.repoName != "" {
+		dirSet[env.repoName] = true
+	}
+	if len(dirSet) == 0 {
+		err := errors.New("nothing to load: no repo and no repo_map.Src")
 		return nil, nil, lexing.SingleErr(err)
 	}
-	var dirs []string
-	for dir := range repoMap.Src {
+	dirs := make([]string, 0, len(dirSet))
+	for dir := range dirSet {
 		dirs = append(dirs, dir)
 	}
 	sort.Strings(dirs)
