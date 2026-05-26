@@ -43,7 +43,7 @@ func sampleBuilt() *built {
 	}
 }
 
-func TestBuildCachePutGet(t *testing.T) {
+func TestBuildCache_putGet(t *testing.T) {
 	c := newTestBuildCache(t)
 	in := sampleBuilt()
 	if err := c.put("k1", in); err != nil {
@@ -58,7 +58,7 @@ func TestBuildCachePutGet(t *testing.T) {
 	}
 }
 
-func TestBuildCacheGetMissing(t *testing.T) {
+func TestBuildCache_getMissing(t *testing.T) {
 	c := newTestBuildCache(t)
 	_, err := c.get("nope")
 	if !errors.Is(err, errCacheMiss) {
@@ -66,14 +66,14 @@ func TestBuildCacheGetMissing(t *testing.T) {
 	}
 }
 
-func TestBuildCacheRemoveMissingIsNoop(t *testing.T) {
+func TestBuildCache_removeMissingIsNoop(t *testing.T) {
 	c := newTestBuildCache(t)
 	if err := c.remove("nope"); err != nil {
 		t.Errorf("remove missing: got %v, want nil", err)
 	}
 }
 
-func TestBuildCacheRemoveThenGetMisses(t *testing.T) {
+func TestBuildCache_removeThenGetMisses(t *testing.T) {
 	c := newTestBuildCache(t)
 	if err := c.put("k", sampleBuilt()); err != nil {
 		t.Fatalf("put: %v", err)
@@ -86,7 +86,7 @@ func TestBuildCacheRemoveThenGetMisses(t *testing.T) {
 	}
 }
 
-func TestBuildCacheExpired(t *testing.T) {
+func TestBuildCache_expired(t *testing.T) {
 	c := newTestBuildCache(t)
 	base := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	c.clock = fixedClock(base)
@@ -108,7 +108,7 @@ func TestBuildCacheExpired(t *testing.T) {
 	}
 }
 
-func TestBuildCacheNotYetExpired(t *testing.T) {
+func TestBuildCache_notYetExpired(t *testing.T) {
 	c := newTestBuildCache(t)
 	base := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	c.clock = fixedClock(base)
@@ -128,7 +128,7 @@ func TestBuildCacheNotYetExpired(t *testing.T) {
 	}
 }
 
-func TestBuildCachePutOverwrites(t *testing.T) {
+func TestBuildCache_putOverwrites(t *testing.T) {
 	c := newTestBuildCache(t)
 
 	first := &built{Outs: []*fileStat{{Name: "a"}}}

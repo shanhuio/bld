@@ -43,7 +43,7 @@ func makeBareRepo(t *testing.T) string {
 	return bare
 }
 
-func TestSyncReposSkipsSelf(t *testing.T) {
+func TestSyncRepos_skipsSelf(t *testing.T) {
 	bare := makeBareRepo(t)
 	root := t.TempDir()
 
@@ -107,7 +107,7 @@ func TestSyncReposSkipsSelf(t *testing.T) {
 	}
 }
 
-func TestSyncReposNoDeps(t *testing.T) {
+func TestSyncRepos_noDeps(t *testing.T) {
 	root := t.TempDir()
 	ws := multiLine(
 		`repo {`,

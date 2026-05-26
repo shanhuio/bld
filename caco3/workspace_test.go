@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestReadWorkspaceLegacy(t *testing.T) {
+func TestReadWorkspace_legacy(t *testing.T) {
 	dir := t.TempDir()
 	f := filepath.Join(dir, "WORKSPACE.caco3")
 	src := multiLine(
@@ -35,7 +35,7 @@ func TestReadWorkspaceLegacy(t *testing.T) {
 	}
 }
 
-func TestReadWorkspaceWithRepo(t *testing.T) {
+func TestReadWorkspace_withRepo(t *testing.T) {
 	dir := t.TempDir()
 	f := filepath.Join(dir, "WORKSPACE.caco3")
 	src := multiLine(
@@ -68,7 +68,7 @@ func TestReadWorkspaceWithRepo(t *testing.T) {
 	}
 }
 
-func TestReadWorkspaceEmptyRepoName(t *testing.T) {
+func TestReadWorkspace_emptyRepoName(t *testing.T) {
 	root := t.TempDir()
 	src := multiLine(
 		`repo {`,
@@ -91,7 +91,7 @@ func TestReadWorkspaceEmptyRepoName(t *testing.T) {
 	}
 }
 
-func TestReadWorkspaceRepoOnly(t *testing.T) {
+func TestReadWorkspace_repoOnly(t *testing.T) {
 	dir := t.TempDir()
 	f := filepath.Join(dir, "WORKSPACE.caco3")
 	src := multiLine(

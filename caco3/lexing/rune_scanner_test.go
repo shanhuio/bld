@@ -69,7 +69,7 @@ func (r *errorReader) Read(bs []byte) (int, error) {
 	return 0, errTest
 }
 
-func TestRuneScannerError(t *testing.T) {
+func TestRuneScanner_error(t *testing.T) {
 	r := &errorReader{r: strings.NewReader("x")}
 	s := newRuneScanner("a.txt", r)
 	if !s.scan() {

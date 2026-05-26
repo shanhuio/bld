@@ -2,7 +2,7 @@ package gofiledag
 
 import "testing"
 
-func TestBuildFileGraphSimpleEdge(t *testing.T) {
+func TestBuildFileGraph_simpleEdge(t *testing.T) {
 	pkg := parsePkg(t, map[string]string{
 		"a.go": "package test\n\nfunc UseB() int { return B }\n",
 		"b.go": "package test\n\nconst B = 1\n",
@@ -18,7 +18,7 @@ func TestBuildFileGraphSimpleEdge(t *testing.T) {
 	}
 }
 
-func TestBuildFileGraphNoSelfEdges(t *testing.T) {
+func TestBuildFileGraph_noSelfEdges(t *testing.T) {
 	pkg := parsePkg(t, map[string]string{
 		"a.go": "package test\n\nconst X = 1\n\nfunc UseX() int { return X }\n",
 	})
@@ -28,7 +28,7 @@ func TestBuildFileGraphNoSelfEdges(t *testing.T) {
 	}
 }
 
-func TestBuildFileGraphCycle(t *testing.T) {
+func TestBuildFileGraph_cycle(t *testing.T) {
 	pkg := parsePkg(t, map[string]string{
 		"a.go": "package test\n\nfunc UseB() int { return B }\n\nconst A = 2\n",
 		"b.go": "package test\n\nfunc UseA() int { return A }\n\nconst B = 1\n",

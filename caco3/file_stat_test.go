@@ -43,7 +43,7 @@ func newTestRepoEnv(t *testing.T, repoName string) (*env, string) {
 	}, root
 }
 
-func TestNewFileStatSrc(t *testing.T) {
+func TestNewFileStat_src(t *testing.T) {
 	e, srcDir, _ := newTestEnv(t)
 	content := []byte("hello")
 	if err := os.WriteFile(filepath.Join(srcDir, "f.txt"), content, 0644); err != nil {
@@ -71,7 +71,7 @@ func TestNewFileStatSrc(t *testing.T) {
 	}
 }
 
-func TestNewFileStatOut(t *testing.T) {
+func TestNewFileStat_out(t *testing.T) {
 	e, _, outDir := newTestEnv(t)
 	if err := os.WriteFile(filepath.Join(outDir, "o.bin"), []byte("xy"), 0644); err != nil {
 		t.Fatalf("setup: %v", err)
@@ -85,7 +85,7 @@ func TestNewFileStatOut(t *testing.T) {
 	}
 }
 
-func TestNewFileStatMissing(t *testing.T) {
+func TestNewFileStat_missing(t *testing.T) {
 	e, _, _ := newTestEnv(t)
 	_, err := newSrcFileStat(e, "nope.txt")
 	if err == nil {
@@ -96,7 +96,7 @@ func TestNewFileStatMissing(t *testing.T) {
 	}
 }
 
-func TestNewFileStatSymlink(t *testing.T) {
+func TestNewFileStat_symlink(t *testing.T) {
 	e, srcDir, _ := newTestEnv(t)
 	target := filepath.Join(srcDir, "target.txt")
 	if err := os.WriteFile(target, []byte("data"), 0644); err != nil {
@@ -116,7 +116,7 @@ func TestNewFileStatSymlink(t *testing.T) {
 	}
 }
 
-func TestSameFileStatUnchanged(t *testing.T) {
+func TestSameFileStat_unchanged(t *testing.T) {
 	e, srcDir, _ := newTestEnv(t)
 	if err := os.WriteFile(filepath.Join(srcDir, "a"), []byte("x"), 0644); err != nil {
 		t.Fatalf("setup: %v", err)
@@ -134,7 +134,7 @@ func TestSameFileStatUnchanged(t *testing.T) {
 	}
 }
 
-func TestSameFileStatSizeChanged(t *testing.T) {
+func TestSameFileStat_sizeChanged(t *testing.T) {
 	e, srcDir, _ := newTestEnv(t)
 	f := filepath.Join(srcDir, "a")
 	if err := os.WriteFile(f, []byte("x"), 0644); err != nil {
@@ -156,7 +156,7 @@ func TestSameFileStatSizeChanged(t *testing.T) {
 	}
 }
 
-func TestSameFileStatDeleted(t *testing.T) {
+func TestSameFileStat_deleted(t *testing.T) {
 	e, srcDir, _ := newTestEnv(t)
 	f := filepath.Join(srcDir, "a")
 	if err := os.WriteFile(f, []byte("x"), 0644); err != nil {

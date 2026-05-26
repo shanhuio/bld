@@ -24,7 +24,7 @@ func graphOf(files []string, edges map[string][]string) *FileGraph {
 	return g
 }
 
-func TestFindCyclesAcyclic(t *testing.T) {
+func TestFindCycles_acyclic(t *testing.T) {
 	g := graphOf(
 		[]string{"a", "b", "c"},
 		map[string][]string{
@@ -37,7 +37,7 @@ func TestFindCyclesAcyclic(t *testing.T) {
 	}
 }
 
-func TestFindCyclesSimple(t *testing.T) {
+func TestFindCycles_simple(t *testing.T) {
 	g := graphOf(
 		[]string{"a", "b"},
 		map[string][]string{
@@ -51,7 +51,7 @@ func TestFindCyclesSimple(t *testing.T) {
 	}
 }
 
-func TestFindCyclesMultiple(t *testing.T) {
+func TestFindCycles_multiple(t *testing.T) {
 	g := graphOf(
 		[]string{"a", "b", "c", "x", "y"},
 		map[string][]string{
@@ -78,7 +78,7 @@ func TestPickSmallestCycle(t *testing.T) {
 	}
 }
 
-func TestWalkCycleTwo(t *testing.T) {
+func TestWalkCycle_two(t *testing.T) {
 	g := graphOf(
 		[]string{"a", "b"},
 		map[string][]string{
@@ -93,7 +93,7 @@ func TestWalkCycleTwo(t *testing.T) {
 	}
 }
 
-func TestWalkCycleThree(t *testing.T) {
+func TestWalkCycle_three(t *testing.T) {
 	g := graphOf(
 		[]string{"a", "b", "c"},
 		map[string][]string{
@@ -109,14 +109,14 @@ func TestWalkCycleThree(t *testing.T) {
 	}
 }
 
-func TestFindFirstCycleNone(t *testing.T) {
+func TestFindFirstCycle_none(t *testing.T) {
 	g := graphOf([]string{"a"}, nil)
 	if got := findFirstCycle(g); got != nil {
 		t.Errorf("findFirstCycle: got %v, want nil", got)
 	}
 }
 
-func TestFindFirstCyclePicksSmallest(t *testing.T) {
+func TestFindFirstCycle_picksSmallest(t *testing.T) {
 	g := graphOf(
 		[]string{"a", "b", "c", "x", "y"},
 		map[string][]string{

@@ -25,7 +25,7 @@ func TestFileSetOut(t *testing.T) {
 	}
 }
 
-func TestListAllFilesBasic(t *testing.T) {
+func TestListAllFiles_basic(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "a.txt"), "a")
 	writeFile(t, filepath.Join(dir, "sub", "b.txt"), "b")
@@ -44,7 +44,7 @@ func TestListAllFilesBasic(t *testing.T) {
 	}
 }
 
-func TestListAllFilesIgnores(t *testing.T) {
+func TestListAllFiles_ignores(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "keep.txt"), "k")
 	writeFile(t, filepath.Join(dir, ".gitignore"), "g")
@@ -71,7 +71,7 @@ func TestListAllFilesIgnores(t *testing.T) {
 	}
 }
 
-func TestListAllFilesIncludesSymlinks(t *testing.T) {
+func TestListAllFiles_includesSymlinks(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "real.txt"), "r")
 	if err := os.Symlink("real.txt", filepath.Join(dir, "link")); err != nil {
@@ -86,7 +86,7 @@ func TestListAllFilesIncludesSymlinks(t *testing.T) {
 	}
 }
 
-func TestNewFileSetSelectGlob(t *testing.T) {
+func TestFileSet_selectGlob(t *testing.T) {
 	e, srcDir, _ := newTestEnv(t)
 	writeFile(t, filepath.Join(srcDir, "pkg", "a.go"), "a")
 	writeFile(t, filepath.Join(srcDir, "pkg", "b.go"), "b")
@@ -111,7 +111,7 @@ func TestNewFileSetSelectGlob(t *testing.T) {
 	}
 }
 
-func TestNewFileSetSelectAllRecursive(t *testing.T) {
+func TestFileSet_selectAllRecursive(t *testing.T) {
 	e, srcDir, _ := newTestEnv(t)
 	writeFile(t, filepath.Join(srcDir, "pkg", "a.go"), "a")
 	writeFile(t, filepath.Join(srcDir, "pkg", "sub", "b.go"), "b")
@@ -130,7 +130,7 @@ func TestNewFileSetSelectAllRecursive(t *testing.T) {
 	}
 }
 
-func TestNewFileSetIgnoreGlobAndDir(t *testing.T) {
+func TestFileSet_ignoreGlobAndDir(t *testing.T) {
 	e, srcDir, _ := newTestEnv(t)
 	writeFile(t, filepath.Join(srcDir, "pkg", "a.go"), "a")
 	writeFile(t, filepath.Join(srcDir, "pkg", "a_test.go"), "x")
@@ -150,7 +150,7 @@ func TestNewFileSetIgnoreGlobAndDir(t *testing.T) {
 	}
 }
 
-func TestNewFileSetExplicitFiles(t *testing.T) {
+func TestFileSet_explicitFiles(t *testing.T) {
 	e, srcDir, _ := newTestEnv(t)
 	writeFile(t, filepath.Join(srcDir, "pkg", "a.go"), "a")
 	writeFile(t, filepath.Join(srcDir, "pkg", "b.go"), "b")
@@ -168,7 +168,7 @@ func TestNewFileSetExplicitFiles(t *testing.T) {
 	}
 }
 
-func TestNewFileSetSelectNoMatch(t *testing.T) {
+func TestFileSet_selectNoMatch(t *testing.T) {
 	e, srcDir, _ := newTestEnv(t)
 	writeFile(t, filepath.Join(srcDir, "pkg", "a.go"), "a")
 
@@ -181,7 +181,7 @@ func TestNewFileSetSelectNoMatch(t *testing.T) {
 	}
 }
 
-func TestFileSetMetaDigestAndDeps(t *testing.T) {
+func TestFileSet_metaDigestAndDeps(t *testing.T) {
 	e, srcDir, _ := newTestEnv(t)
 	writeFile(t, filepath.Join(srcDir, "pkg", "a.go"), "a")
 	writeFile(t, filepath.Join(srcDir, "pkg", "b.go"), "b")
@@ -266,7 +266,7 @@ func TestReferenceFileSetOut(t *testing.T) {
 	}
 }
 
-func TestFileSetBuildAggregatesStats(t *testing.T) {
+func TestFileSet_buildAggregatesStats(t *testing.T) {
 	e, srcDir, outDir := newTestEnv(t)
 	writeFile(t, filepath.Join(srcDir, "pkg", "a.go"), "a")
 	writeFile(t, filepath.Join(srcDir, "pkg", "b.go"), "bb")
@@ -309,7 +309,7 @@ func TestFileSetBuildAggregatesStats(t *testing.T) {
 	}
 }
 
-func TestFileSetBuildMissingFile(t *testing.T) {
+func TestFileSet_buildMissingFile(t *testing.T) {
 	e, _, _ := newTestEnv(t)
 	fs := &fileSet{
 		name:  "pkg/src",
@@ -323,12 +323,12 @@ func TestFileSetBuildMissingFile(t *testing.T) {
 	}
 }
 
-// TestFileSetSelectAllFilesInRepo verifies that a file_set with
+// TestFileSet_selectAllFilesInRepo verifies that a file_set with
 // Select: ["**"] at the root of a single-repo workspace does NOT pull
 // in files that live under _/src (which belong to depended-on repos).
 // Skipping is handled in listAllFiles, which treats any directory
 // literally named "_" the same way it treats ".git".
-func TestFileSetSelectAllFilesInRepo(t *testing.T) {
+func TestFileSet_selectAllFilesInRepo(t *testing.T) {
 	const repoName = "test.local/self/dockers"
 	e, root := newTestRepoEnv(t, repoName)
 

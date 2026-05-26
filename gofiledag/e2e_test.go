@@ -34,7 +34,7 @@ func analyzeFixture(t *testing.T, name string) *Result {
 	return nil
 }
 
-func TestEndToEndAcyclic(t *testing.T) {
+func TestEndToEnd_acyclic(t *testing.T) {
 	r := analyzeFixture(t, "acyclic")
 	if r.Skipped != "" {
 		t.Fatalf("unexpected skip: %s", r.Skipped)
@@ -56,7 +56,7 @@ func TestEndToEndAcyclic(t *testing.T) {
 	}
 }
 
-func TestEndToEndCyclic(t *testing.T) {
+func TestEndToEnd_cyclic(t *testing.T) {
 	r := analyzeFixture(t, "cyclic")
 	if len(r.Violations) != 1 {
 		t.Fatalf("got %d violations, want 1: %+v", len(r.Violations), r.Violations)
@@ -76,7 +76,7 @@ func TestEndToEndCyclic(t *testing.T) {
 	}
 }
 
-func TestEndToEndBadMethod(t *testing.T) {
+func TestEndToEnd_badMethod(t *testing.T) {
 	r := analyzeFixture(t, "badmethod")
 	if len(r.Violations) != 1 {
 		t.Fatalf("got %d violations, want 1: %+v", len(r.Violations), r.Violations)
@@ -93,7 +93,7 @@ func TestEndToEndBadMethod(t *testing.T) {
 	}
 }
 
-func TestEndToEndGenerated(t *testing.T) {
+func TestEndToEnd_generated(t *testing.T) {
 	r := analyzeFixture(t, "generated")
 	if r.Skipped == "" {
 		t.Fatalf("expected skip, got violations=%v", r.Violations)
@@ -106,7 +106,7 @@ func TestEndToEndGenerated(t *testing.T) {
 	}
 }
 
-func TestEndToEndWithTestsHasTwoPasses(t *testing.T) {
+func TestEndToEnd_withTestsHasTwoPasses(t *testing.T) {
 	passes := loadFixture(t, "withtests")
 	kinds := make(map[PassKind]bool)
 	for _, p := range passes {
@@ -127,7 +127,7 @@ func TestEndToEndWithTestsHasTwoPasses(t *testing.T) {
 	}
 }
 
-func TestPrintCheckResultsCycle(t *testing.T) {
+func TestPrintCheckResults_cycle(t *testing.T) {
 	r := analyzeFixture(t, "cyclic")
 	var buf bytes.Buffer
 	fails := PrintCheckResults(&buf, []*Result{r}, "")
@@ -142,7 +142,7 @@ func TestPrintCheckResultsCycle(t *testing.T) {
 	}
 }
 
-func TestPrintCheckResultsClean(t *testing.T) {
+func TestPrintCheckResults_clean(t *testing.T) {
 	r := analyzeFixture(t, "acyclic")
 	var buf bytes.Buffer
 	fails := PrintCheckResults(&buf, []*Result{r}, "")
@@ -154,7 +154,7 @@ func TestPrintCheckResultsClean(t *testing.T) {
 	}
 }
 
-func TestPrintGraphResultsClean(t *testing.T) {
+func TestPrintGraphResults_clean(t *testing.T) {
 	r := analyzeFixture(t, "acyclic")
 	var buf bytes.Buffer
 	fails := PrintGraphResults(&buf, []*Result{r}, "")
@@ -169,7 +169,7 @@ func TestPrintGraphResultsClean(t *testing.T) {
 	}
 }
 
-func TestPrintCheckResultsSkipped(t *testing.T) {
+func TestPrintCheckResults_skipped(t *testing.T) {
 	r := analyzeFixture(t, "generated")
 	var buf bytes.Buffer
 	fails := PrintCheckResults(&buf, []*Result{r}, "")
@@ -182,7 +182,7 @@ func TestPrintCheckResultsSkipped(t *testing.T) {
 	}
 }
 
-func TestAnalyzePassesSkipsWithTestsWhenProdFails(t *testing.T) {
+func TestAnalyzePasses_skipsWithTestsWhenProdFails(t *testing.T) {
 	passes := loadFixture(t, "cyclicwithtest")
 
 	// Sanity: the loader should produce both a production and a with-tests
@@ -221,7 +221,7 @@ func TestAnalyzePassesSkipsWithTestsWhenProdFails(t *testing.T) {
 	}
 }
 
-func TestAnalyzePassesKeepsWithTestsWhenProdClean(t *testing.T) {
+func TestAnalyzePasses_keepsWithTestsWhenProdClean(t *testing.T) {
 	results := AnalyzePasses(loadFixture(t, "withtests"))
 	var hasProd, hasWithTests bool
 	for _, r := range results {

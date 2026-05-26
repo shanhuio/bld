@@ -24,7 +24,7 @@ func gitAddRemote(t *testing.T, dir, name, url string) {
 	}
 }
 
-func TestListRemotesEmpty(t *testing.T) {
+func TestListRemotes_empty(t *testing.T) {
 	dir := gitInitRepo(t)
 	remotes, err := listRemotes(dir)
 	if err != nil {
@@ -35,7 +35,7 @@ func TestListRemotesEmpty(t *testing.T) {
 	}
 }
 
-func TestListRemotesSingle(t *testing.T) {
+func TestListRemotes_single(t *testing.T) {
 	dir := gitInitRepo(t)
 	gitAddRemote(t, dir, "origin", "git@example.com:foo/bar.git")
 
@@ -64,7 +64,7 @@ func TestListRemotesSingle(t *testing.T) {
 	}
 }
 
-func TestListRemotesMultiple(t *testing.T) {
+func TestListRemotes_multiple(t *testing.T) {
 	dir := gitInitRepo(t)
 	gitAddRemote(t, dir, "origin", "git@example.com:foo/bar.git")
 	gitAddRemote(t, dir, "github", "git@github.com:foo/bar.git")
@@ -95,7 +95,7 @@ func TestListRemotesMultiple(t *testing.T) {
 	}
 }
 
-func TestListRemotesNotGitRepo(t *testing.T) {
+func TestListRemotes_notGitRepo(t *testing.T) {
 	dir := t.TempDir()
 	if _, err := listRemotes(dir); err == nil {
 		t.Error("listRemotes on non-git dir: want error, got nil")

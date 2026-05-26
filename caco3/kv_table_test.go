@@ -21,7 +21,7 @@ func newTestKVTable(t *testing.T) *kvTable {
 	return tab
 }
 
-func TestKVTableReplaceAndGet(t *testing.T) {
+func TestKVTable_replaceAndGet(t *testing.T) {
 	tab := newTestKVTable(t)
 
 	type entry struct{ Name string }
@@ -39,7 +39,7 @@ func TestKVTableReplaceAndGet(t *testing.T) {
 	}
 }
 
-func TestKVTableReplaceOverwrites(t *testing.T) {
+func TestKVTable_replaceOverwrites(t *testing.T) {
 	tab := newTestKVTable(t)
 	type entry struct{ N int }
 
@@ -59,7 +59,7 @@ func TestKVTableReplaceOverwrites(t *testing.T) {
 	}
 }
 
-func TestKVTableGetMissing(t *testing.T) {
+func TestKVTable_getMissing(t *testing.T) {
 	tab := newTestKVTable(t)
 	var v struct{}
 	err := tab.get("nope", &v)
@@ -68,14 +68,14 @@ func TestKVTableGetMissing(t *testing.T) {
 	}
 }
 
-func TestKVTableRemoveMissing(t *testing.T) {
+func TestKVTable_removeMissing(t *testing.T) {
 	tab := newTestKVTable(t)
 	if err := tab.remove("nope"); !errors.Is(err, errKeyNotFound) {
 		t.Errorf("remove missing: want errKeyNotFound, got %v", err)
 	}
 }
 
-func TestKVTableRemoveExisting(t *testing.T) {
+func TestKVTable_removeExisting(t *testing.T) {
 	tab := newTestKVTable(t)
 	type entry struct{ X int }
 
@@ -91,7 +91,7 @@ func TestKVTableRemoveExisting(t *testing.T) {
 	}
 }
 
-func TestKVTablePersistAcrossOpen(t *testing.T) {
+func TestKVTable_persistAcrossOpen(t *testing.T) {
 	dir := t.TempDir()
 	f := filepath.Join(dir, "kv.sqlite")
 

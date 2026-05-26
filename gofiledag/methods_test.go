@@ -2,7 +2,7 @@ package gofiledag
 
 import "testing"
 
-func TestCheckMethodsSameFile(t *testing.T) {
+func TestCheckMethods_sameFile(t *testing.T) {
 	pkg := parsePkg(t, map[string]string{
 		"foo.go": `package test
 
@@ -16,7 +16,7 @@ func (f *Foo) Bar() {}
 	}
 }
 
-func TestCheckMethodsDifferentFile(t *testing.T) {
+func TestCheckMethods_differentFile(t *testing.T) {
 	pkg := parsePkg(t, map[string]string{
 		"type.go":   "package test\n\ntype Foo struct{}\n",
 		"method.go": "package test\n\nfunc (f *Foo) Bar() {}\n",
@@ -34,7 +34,7 @@ func TestCheckMethodsDifferentFile(t *testing.T) {
 	}
 }
 
-func TestCheckMethodsPointerAndValueReceivers(t *testing.T) {
+func TestCheckMethods_pointerAndValueReceivers(t *testing.T) {
 	pkg := parsePkg(t, map[string]string{
 		"a.go": "package test\n\ntype T struct{}\n",
 		"b.go": "package test\n\nfunc (t T) M1() {}\nfunc (t *T) M2() {}\n",
@@ -45,7 +45,7 @@ func TestCheckMethodsPointerAndValueReceivers(t *testing.T) {
 	}
 }
 
-func TestCheckMethodsGenericReceiver(t *testing.T) {
+func TestCheckMethods_genericReceiver(t *testing.T) {
 	pkg := parsePkg(t, map[string]string{
 		"a.go": "package test\n\ntype Box[T any] struct{ V T }\n",
 		"b.go": "package test\n\nfunc (b *Box[T]) Get() T { return b.V }\n",

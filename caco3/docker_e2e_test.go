@@ -37,7 +37,7 @@ func dockerRmiTags(refs ...string) {
 	}
 }
 
-func TestE2EBuildAndRun(t *testing.T) {
+func TestE2E_buildAndRun(t *testing.T) {
 	requireDocker(t)
 
 	// Pre-test cleanup: remove any leftover tags so AlwaysRebuild starts
@@ -161,17 +161,17 @@ const e2eAppDockerfile = `FROM test.local/proj1/alpine:latest
 COPY payload.txt /payload.txt
 `
 
-// e2eSingleRepoTags are the local image tags TestE2ESingleRepoNoDeps creates.
+// e2eSingleRepoTags are the local image tags TestE2E_singleRepoNoDeps creates.
 var e2eSingleRepoTags = []string{
 	"test.local/standalone/alpine:latest",
 	"test.local/standalone/hello:latest",
 }
 
-// TestE2ESingleRepoNoDeps exercises Stage 2 of single-repo mode: the
+// TestE2E_singleRepoNoDeps exercises Stage 2 of single-repo mode: the
 // workspace declares a `repo` block, has no external dependencies, and
 // builds its own rules entirely out of files at the repo root. All
 // outputs land under _/out.
-func TestE2ESingleRepoNoDeps(t *testing.T) {
+func TestE2E_singleRepoNoDeps(t *testing.T) {
 	requireDocker(t)
 
 	dockerRmiTags(e2eSingleRepoTags...)
@@ -252,13 +252,13 @@ const singleRepoDockerfile = `FROM test.local/standalone/alpine:latest
 COPY payload.txt /payload.txt
 `
 
-// TestE2ESingleRepoWithDep exercises Stage 3 of single-repo mode: the
+// TestE2E_singleRepoWithDep exercises Stage 3 of single-repo mode: the
 // workspace's self repo (test.local/proj2/dockers) declares one external
 // dependency (test.local/proj1/dockers), pre-checked-out under _/src.
 // The dep provides docker_pull alpine; the self repo's docker_build app
 // references it via an absolute "From" path; docker_run smoke/verify
 // chain on top.
-func TestE2ESingleRepoWithDep(t *testing.T) {
+func TestE2E_singleRepoWithDep(t *testing.T) {
 	requireDocker(t)
 
 	dockerRmiTags(e2eTags...)

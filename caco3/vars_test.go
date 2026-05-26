@@ -63,7 +63,7 @@ func TestMakeDockerVars(t *testing.T) {
 	}
 }
 
-func TestMakeDockerVarsNilLookupUsesOSEnv(t *testing.T) {
+func TestMakeDockerVars_nilLookupUsesOSEnv(t *testing.T) {
 	t.Setenv("CACO3_TEST_VAR", "hello")
 	got := makeDockerVars([]string{"CACO3_TEST_VAR"}, nil)
 	want := map[string]string{"CACO3_TEST_VAR": "hello"}

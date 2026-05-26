@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestLoadTracerEmpty(t *testing.T) {
+func TestLoadTracer_empty(t *testing.T) {
 	tr := newLoadTracer()
 	if got := tr.stack(); len(got) != 0 {
 		t.Errorf("new tracer stack: got %v, want empty", got)
@@ -16,7 +16,7 @@ func TestLoadTracerEmpty(t *testing.T) {
 	}
 }
 
-func TestLoadTracerPushPop(t *testing.T) {
+func TestLoadTracer_pushPop(t *testing.T) {
 	tr := newLoadTracer()
 	if !tr.push("a") {
 		t.Error(`push("a"): got false, want true`)

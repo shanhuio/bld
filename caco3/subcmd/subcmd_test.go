@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestRunNoCommand(t *testing.T) {
+func TestRun_noCommand(t *testing.T) {
 	lst := New()
 	lst.Add("foo", "", func([]string) error { return nil })
 	if got := lst.Run([]string{"prog"}); got != -1 {
@@ -15,7 +15,7 @@ func TestRunNoCommand(t *testing.T) {
 	}
 }
 
-func TestRunHelp(t *testing.T) {
+func TestRun_help(t *testing.T) {
 	lst := New()
 	lst.Add("foo", "", func([]string) error {
 		t.Fatal("foo should not be invoked for help")
@@ -28,14 +28,14 @@ func TestRunHelp(t *testing.T) {
 	}
 }
 
-func TestRunUnknownCommand(t *testing.T) {
+func TestRun_unknownCommand(t *testing.T) {
 	lst := New()
 	if got := lst.Run([]string{"prog", "nope"}); got != -1 {
 		t.Errorf("unknown command: got %d, want -1", got)
 	}
 }
 
-func TestRunNilFunc(t *testing.T) {
+func TestRun_nilFunc(t *testing.T) {
 	lst := New()
 	lst.Add("noop", "", nil)
 	if got := lst.Run([]string{"prog", "noop"}); got != 0 {
@@ -43,7 +43,7 @@ func TestRunNilFunc(t *testing.T) {
 	}
 }
 
-func TestRunHandlerSuccess(t *testing.T) {
+func TestRun_handlerSuccess(t *testing.T) {
 	lst := New()
 	var gotArgs []string
 	lst.Add("foo", "", func(args []string) error {
@@ -59,7 +59,7 @@ func TestRunHandlerSuccess(t *testing.T) {
 	}
 }
 
-func TestRunHandlerError(t *testing.T) {
+func TestRun_handlerError(t *testing.T) {
 	lst := New()
 	lst.Add("foo", "", func([]string) error { return errors.New("boom") })
 	if got := lst.Run([]string{"prog", "foo"}); got != -1 {
@@ -67,7 +67,7 @@ func TestRunHandlerError(t *testing.T) {
 	}
 }
 
-func TestAddDuplicatePanics(t *testing.T) {
+func TestAdd_duplicatePanics(t *testing.T) {
 	lst := New()
 	lst.Add("foo", "", nil)
 	defer func() {
@@ -78,7 +78,7 @@ func TestAddDuplicatePanics(t *testing.T) {
 	lst.Add("foo", "", nil)
 }
 
-func TestHelpSortedOutput(t *testing.T) {
+func TestHelp_sortedOutput(t *testing.T) {
 	lst := New()
 	lst.Add("zoo", "z desc", nil)
 	lst.Add("apple", "a desc", nil)

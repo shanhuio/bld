@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestJSONFileRoundTrip(t *testing.T) {
+func TestJSONFile_roundTrip(t *testing.T) {
 	dir := t.TempDir()
 	file := filepath.Join(dir, "data.json")
 
@@ -29,7 +29,7 @@ func TestJSONFileRoundTrip(t *testing.T) {
 	}
 }
 
-func TestReadJSONFileMissing(t *testing.T) {
+func TestReadJSONFile_missing(t *testing.T) {
 	var out struct{}
 	err := readJSONFile(filepath.Join(t.TempDir(), "nope.json"), &out)
 	if err == nil {
@@ -40,7 +40,7 @@ func TestReadJSONFileMissing(t *testing.T) {
 	}
 }
 
-func TestReadJSONFileMalformed(t *testing.T) {
+func TestReadJSONFile_malformed(t *testing.T) {
 	dir := t.TempDir()
 	file := filepath.Join(dir, "bad.json")
 	if err := os.WriteFile(file, []byte("not json"), 0644); err != nil {
@@ -52,7 +52,7 @@ func TestReadJSONFileMalformed(t *testing.T) {
 	}
 }
 
-func TestWriteJSONFileUnmarshalable(t *testing.T) {
+func TestWriteJSONFile_unmarshalable(t *testing.T) {
 	file := filepath.Join(t.TempDir(), "out.json")
 	// Channels cannot be marshaled to JSON.
 	err := writeJSONFile(file, make(chan int))

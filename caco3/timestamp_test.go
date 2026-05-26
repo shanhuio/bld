@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestTimestampRoundTrip(t *testing.T) {
+func TestTimestamp_roundTrip(t *testing.T) {
 	now := time.Now()
 	got := newTimestamp(now).toTime().UnixNano()
 	if got != now.UnixNano() {
@@ -13,7 +13,7 @@ func TestTimestampRoundTrip(t *testing.T) {
 	}
 }
 
-func TestTimestampNilToTime(t *testing.T) {
+func TestTimestamp_nilToTime(t *testing.T) {
 	var ts *timestamp
 	got := ts.toTime()
 	var zero time.Time

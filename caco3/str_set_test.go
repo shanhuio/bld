@@ -43,7 +43,7 @@ func TestSortedStrList(t *testing.T) {
 	}
 }
 
-func TestStrSetRoundTrip(t *testing.T) {
+func TestStrSet_roundTrip(t *testing.T) {
 	in := []string{"banana", "apple", "cherry", "apple"}
 	got := sortedStrList(makeStrSet(in))
 	want := []string{"apple", "banana", "cherry"}
