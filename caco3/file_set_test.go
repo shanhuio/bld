@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 )
 
@@ -53,6 +54,7 @@ func TestListAllFilesIgnores(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "BUILD.caco3"), "b")
 	writeFile(t, filepath.Join(dir, "WORKSPACE.caco3"), "w")
 	writeFile(t, filepath.Join(dir, ".git", "config"), "x")
+	writeFile(t, filepath.Join(dir, "_", "src", "dep", "d.go"), "x")
 	writeFile(t, filepath.Join(dir, "sub", "regular.go"), "r")
 
 	got, err := listAllFiles(dir)
@@ -318,5 +320,53 @@ func TestFileSetBuildMissingFile(t *testing.T) {
 	err := fs.build(e, &buildOpts{})
 	if err == nil {
 		t.Fatal("want error for missing file, got nil")
+	}
+}
+
+// TestFileSetSelectAllFilesInRepo verifies that a file_set with
+// Select: ["**"] at the root of a single-repo workspace does NOT pull
+// in files that live under _/src (which belong to depended-on repos).
+// Skipping is handled in listAllFiles, which treats any directory
+// literally named "_" the same way it treats ".git".
+func TestFileSetSelectAllFilesInRepo(t *testing.T) {
+	const repoName = "test.local/self/dockers"
+	e, root := newTestRepoEnv(t, repoName)
+
+	// Self-repo files at the workspace root.
+	writeFile(t, filepath.Join(root, "a.go"), "a")
+	writeFile(t, filepath.Join(root, "sub/b.go"), "b")
+
+	// A dependency repo, pre-checked-out under _/src.
+	writeFile(t,
+		filepath.Join(root, "_/src/test.local/dep/dockers/dep.go"), "dep",
+	)
+
+	fs, err := newFileSet(e, repoName, &FileSet{
+		Name:   "all",
+		Select: []string{"**"},
+	})
+	if err != nil {
+		t.Fatalf("newFileSet: %v", err)
+	}
+
+	for _, f := range fs.files {
+		if strings.HasPrefix(f, "test.local/dep/") {
+			t.Errorf("file_set unexpectedly includes dep file %q", f)
+		}
+	}
+
+	want := map[string]bool{
+		repoName + "/a.go":     false,
+		repoName + "/sub/b.go": false,
+	}
+	for _, f := range fs.files {
+		if _, ok := want[f]; ok {
+			want[f] = true
+		}
+	}
+	for name, found := range want {
+		if !found {
+			t.Errorf("expected self file %q missing from %v", name, fs.files)
+		}
 	}
 }

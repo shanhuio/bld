@@ -18,7 +18,12 @@ func listAllFiles(dir string) ([]string, error) {
 		}
 		if d.IsDir() { // Ignore all directories.
 			name := d.Name()
-			if name == ".git" {
+			// "_" is the single-repo mode marker for dependency
+			// checkouts (_/src) and build outputs (_/out); we
+			// never want to descend into it from a self-repo
+			// listing. Also matches Go's convention of treating
+			// "_"-prefixed paths as non-source.
+			if name == ".git" || name == "_" {
 				return filepath.SkipDir
 			}
 			return nil

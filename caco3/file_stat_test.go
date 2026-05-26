@@ -20,6 +20,29 @@ func newTestEnv(t *testing.T) (*env, string, string) {
 	return &env{srcDir: srcDir, outDir: outDir}, srcDir, outDir
 }
 
+// newTestRepoEnv returns an env wired up for single-repo mode with the
+// given repoName: rootDir is a fresh t.TempDir, srcDir is <root>/_/src,
+// outDir is <root>/_/out. Returns the env and the rootDir path; the
+// caller usually writes self-repo files under root and dep files under
+// root/_/src/<dep>/.
+func newTestRepoEnv(t *testing.T, repoName string) (*env, string) {
+	t.Helper()
+	root := t.TempDir()
+	srcDir := filepath.Join(root, "_", "src")
+	outDir := filepath.Join(root, "_", "out")
+	for _, d := range []string{srcDir, outDir} {
+		if err := os.MkdirAll(d, 0755); err != nil {
+			t.Fatalf("mkdir %s: %v", d, err)
+		}
+	}
+	return &env{
+		rootDir:  root,
+		srcDir:   srcDir,
+		outDir:   outDir,
+		repoName: repoName,
+	}, root
+}
+
 func TestNewFileStatSrc(t *testing.T) {
 	e, srcDir, _ := newTestEnv(t)
 	content := []byte("hello")
