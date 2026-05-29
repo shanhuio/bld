@@ -1,8 +1,8 @@
 package caco3
 
 import (
-	"shanhu.io/bld/caco3/jsonx"
-	"shanhu.io/bld/caco3/lexing"
+	"shanhu.io/std/jsonx"
+	"shanhu.io/std/lexing"
 )
 
 // Workspace is the structure of the build.jsonx file. It specifies how

@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"shanhu.io/bld/caco3"
-	"shanhu.io/bld/caco3/lexing"
+	"shanhu.io/std/lexing"
 )
 
 func cmdBuild(args []string) error {

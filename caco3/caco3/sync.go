@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"shanhu.io/bld/caco3"
-	"shanhu.io/bld/caco3/lexing"
+	"shanhu.io/std/lexing"
 )
 
 const sumsFile = "sums.jsonx"
