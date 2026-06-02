@@ -40,7 +40,11 @@ func Main(args []string) int {
 		return 1
 	}
 
-	cwd, _ := os.Getwd()
+	cwd, err := os.Getwd()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "get work dir:", err)
+		return 1
+	}
 
 	results := AnalyzePasses(passes)
 

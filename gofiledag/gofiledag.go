@@ -6,6 +6,7 @@ import (
 	"go/token"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 
 	"golang.org/x/tools/go/packages"
@@ -42,7 +43,7 @@ func AnalyzePasses(passes []*Pass) []*Result {
 // Analyze runs all checks on a pass.
 func Analyze(p *Pass) *Result {
 	r := &Result{Pass: p, Pkg: p.Pkg}
-	if hasGenerated(p.Pkg) {
+	if slices.ContainsFunc(p.Pkg.Syntax, isGenerated) {
 		r.Skipped = "contains generated files"
 		return r
 	}
@@ -92,16 +93,6 @@ func cycleViolation(pkg *packages.Package, g *FileGraph, chain []string) Violati
 		Message: msg,
 		Cycle:   steps,
 	}
-}
-
-// hasGenerated returns true if any source file in the package is generated.
-func hasGenerated(pkg *packages.Package) bool {
-	for _, f := range pkg.Syntax {
-		if isGenerated(f) {
-			return true
-		}
-	}
-	return false
 }
 
 // generatedRE matches the standard Go generated-file marker. The marker must
