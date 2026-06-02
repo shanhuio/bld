@@ -5,7 +5,7 @@ go 1.26.3
 require (
 	golang.org/x/tools v0.45.0
 	modernc.org/sqlite v1.51.0
-	shanhu.io/std v0.0.0-20260530234352-ed01c7af6140
+	shanhu.io/std v0.0.0-20260602074256-41ce436c154a
 )
 
 require (
