@@ -51,7 +51,7 @@ func PrintGraphResults(w io.Writer, results []*Result, cwd string) int {
 			}
 			continue
 		}
-		writeGraph(w, r.Graph, cwd)
+		writeGraph(w, r.Graph)
 	}
 	return fails
 }
@@ -76,7 +76,7 @@ func writeViolation(w io.Writer, v *Violation, cwd string) {
 
 // writeGraph writes the file DAG as ranked layers followed by an adjacency
 // list. Layers are computed by Kahn-style longest-path ranking.
-func writeGraph(w io.Writer, g *FileGraph, cwd string) {
+func writeGraph(w io.Writer, g *FileGraph) {
 	if g == nil || len(g.Files) == 0 {
 		fmt.Fprintln(w, "  (no files)")
 		return
