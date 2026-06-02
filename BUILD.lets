@@ -1,0 +1,3 @@
+sub_builds {
+    Dirs: ["dockers"],
+}
