@@ -29,13 +29,13 @@ docker_build {
     ],
     PrefixDir: ".",
     // See https://www.npmjs.com/package/npm
-    Args: ["NPM_VERSION=11.12.1"],
+    Args: ["NPM_VERSION=11.16.0"],
 }
 
 download {
     Name: "download_golang",
-    URL: "https://go.dev/dl/go1.26.2.src.tar.gz",
-    Checksum: "sha256:2e91ebb6947a96e9436fb2b3926a8802efe63a6d375dffec4f82aa9dbd6fd43b",
+    URL: "https://go.dev/dl/go1.26.3.src.tar.gz",
+    Checksum: "sha256:1c646875d0aa8799133184ed57cf79ff24bdefe8c8820470602a9d3d6d9192b8",
     Output: "go-src.tgz",
 }
 
@@ -84,4 +84,3 @@ bundle {
         "nodejs",
     ],
 }
-
