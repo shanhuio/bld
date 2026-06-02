@@ -1,5 +1,5 @@
 FROM cr.shanhu.io/lib/golang
-MAINTAINER Shanhu Tech Inc.
+LABEL author="Shanhu Tech Inc."
 
 RUN apk add --update bash
 RUN adduser -D -u 1000 forge

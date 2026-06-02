@@ -1,5 +1,5 @@
 FROM cr.shanhu.io/lib/golang
-MAINTAINER Shanhu Tech Inc.
+LABEL author="Shanhu Tech Inc."
 
 RUN mkdir /usr/local/idle
 COPY idle.go /usr/local/idle/idle.go

@@ -1,5 +1,5 @@
 FROM cr.shanhu.io/lib/base
-MAINTAINER Shanhu Tech Inc.
+LABEL author="Shanhu Tech Inc."
 
 RUN adduser -D -u 3000 app
 RUN mkdir -p /opt/app
