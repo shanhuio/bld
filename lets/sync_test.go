@@ -25,8 +25,8 @@ func makeBareRepo(t *testing.T) string {
 		t.Fatalf("write README: %v", err)
 	}
 	for _, args := range [][]string{
-		{"config", "user.email", "caco3-test@example.com"},
-		{"config", "user.name", "caco3-test"},
+		{"config", "user.email", "lets-test@example.com"},
+		{"config", "user.name", "lets-test"},
 		{"add", "README"},
 		{"commit", "-q", "-m", "initial"},
 	} {

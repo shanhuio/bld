@@ -64,9 +64,9 @@ func TestMakeDockerVars(t *testing.T) {
 }
 
 func TestMakeDockerVars_nilLookupUsesOSEnv(t *testing.T) {
-	t.Setenv("CACO3_TEST_VAR", "hello")
-	got := makeDockerVars([]string{"CACO3_TEST_VAR"}, nil)
-	want := map[string]string{"CACO3_TEST_VAR": "hello"}
+	t.Setenv("LETS_TEST_VAR", "hello")
+	got := makeDockerVars([]string{"LETS_TEST_VAR"}, nil)
+	want := map[string]string{"LETS_TEST_VAR": "hello"}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v, want %v", got, want)
 	}

@@ -53,7 +53,7 @@ func gitSync(name, dir, remote, commit string) (*syncResult, error) {
 		return nil, fmt.Errorf("check git dir: %w", err)
 	}
 
-	const stashBranch = "caco3"
+	const stashBranch = "lets"
 
 	if !exist {
 		if err := runCmd(dir, "git", "init", "-q"); err != nil {

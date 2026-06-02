@@ -13,7 +13,7 @@ type Workspace struct {
 }
 
 // Repo identifies the current repo when WORKSPACE.lets lives at the root
-// of a single-repo workspace. When set, caco3 builds the repo's own rules
+// of a single-repo workspace. When set, lets builds the repo's own rules
 // directly and resolves cross-repo dependencies under _/src.
 type Repo struct {
 	Name string

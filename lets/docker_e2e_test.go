@@ -61,7 +61,7 @@ func TestE2E_buildAndRun(t *testing.T) {
 	)
 	writeFile(t,
 		filepath.Join(root, "src/test.local/proj2/dockers/payload.txt"),
-		"hello from caco3\n",
+		"hello from lets\n",
 	)
 
 	b, err := NewBuilder(root, &Config{Root: root, AlwaysRebuild: true})
@@ -93,7 +93,7 @@ func TestE2E_buildAndRun(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read smoke output: %v", err)
 	}
-	if got, want := string(bs), "hello from caco3\n"; got != want {
+	if got, want := string(bs), "hello from lets\n"; got != want {
 		t.Errorf("smoke output = %q, want %q", got, want)
 	}
 
@@ -102,7 +102,7 @@ func TestE2E_buildAndRun(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read verify output: %v", err)
 	}
-	if got, want := string(bs), "hello from caco3\n"; got != want {
+	if got, want := string(bs), "hello from lets\n"; got != want {
 		t.Errorf("verify output = %q, want %q", got, want)
 	}
 
@@ -272,7 +272,7 @@ func TestE2E_singleRepoWithDep(t *testing.T) {
 	// Self-repo files at the repo root.
 	writeFile(t, filepath.Join(root, "BUILD.lets"), e2eProj2Build)
 	writeFile(t, filepath.Join(root, "app/Dockerfile"), e2eAppDockerfile)
-	writeFile(t, filepath.Join(root, "payload.txt"), "hello from caco3\n")
+	writeFile(t, filepath.Join(root, "payload.txt"), "hello from lets\n")
 	// Dependency pre-checked-out under _/src.
 	writeFile(t,
 		filepath.Join(root, "_/src/test.local/proj1/dockers/BUILD.lets"),
@@ -304,7 +304,7 @@ func TestE2E_singleRepoWithDep(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read smoke output: %v", err)
 	}
-	if got, want := string(bs), "hello from caco3\n"; got != want {
+	if got, want := string(bs), "hello from lets\n"; got != want {
 		t.Errorf("smoke output = %q, want %q", got, want)
 	}
 
@@ -312,7 +312,7 @@ func TestE2E_singleRepoWithDep(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read verify output: %v", err)
 	}
-	if got, want := string(bs), "hello from caco3\n"; got != want {
+	if got, want := string(bs), "hello from lets\n"; got != want {
 		t.Errorf("verify output = %q, want %q", got, want)
 	}
 

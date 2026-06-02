@@ -1,6 +1,6 @@
-# caco3
+# lets
 
-`caco3` is a small, content-addressed build tool in the spirit of
+`lets` is a small, content-addressed build tool in the spirit of
 [Bazel](https://bazel.build/), specialized for building and running
 **OCI/Docker container images**. Build rules are declared in `BUILD.lets`
 files, wired together into a dependency graph, and executed only when their
@@ -15,7 +15,7 @@ thin CLI under [`lets/`](./lets).
 
 ### Workspace
 
-A workspace is a directory tree rooted at a `WORKSPACE.lets` file. `caco3`
+A workspace is a directory tree rooted at a `WORKSPACE.lets` file. `lets`
 locates the root by walking up from the current directory until it finds that
 file, so commands can be run from any subdirectory.
 
@@ -23,7 +23,7 @@ There are two layouts:
 
 - **Multi-repo** (`repo_map`): source repositories are checked out under
   `src/<repo-path>/...`, build outputs go to `out/`. The workspace lists the
-  repos it depends on and `caco3 sync` clones/updates them.
+  repos it depends on and `lets sync` clones/updates them.
 - **Single-repo** (`repo`): the workspace *is* one repo. Its own files live at
   the workspace root, external dependencies are checked out under `_/src`, and
   outputs land under `_/out`. The `_/` subtree is never scanned as source.
@@ -112,14 +112,14 @@ redeclared or unresolved names with source positions.
 
 ### Caching
 
-`caco3` is content-addressed. For each rule it computes a **digest** over the
+`lets` is content-addressed. For each rule it computes a **digest** over the
 rule's own definition (action type, args, flags, the Dockerfile path, etc.)
 combined with the digests of all of its dependencies. The digest keys a
 persistent build cache (`CACHE` under the out dir) that records a `built`
 manifest: the stat of each output file and, for image rules, the resulting
 image repo/tag/ID.
 
-Before running an action, `caco3` looks up the digest and verifies the recorded
+Before running an action, `lets` looks up the digest and verifies the recorded
 outputs still match what's on disk (and that image IDs still exist in the
 daemon). If everything matches, the action is skipped. A rule whose digest is
 empty (e.g. it depends on something that always rebuilds) is always re-executed.
@@ -146,8 +146,8 @@ referencing it.
 The CLI lives in [`lets/lets`](./lets) and exposes two subcommands:
 
 ```
-caco3 build [flags] [targets...]    # build the named rules (relative to cwd)
-caco3 sync  [flags] [targets...]    # clone/update source repos
+lets build [flags] [targets...]    # build the named rules (relative to cwd)
+lets sync  [flags] [targets...]    # clone/update source repos
 ```
 
 Common `build` flags:
@@ -165,7 +165,7 @@ Common `build` flags:
 
 `sync` pins each repo to a commit recorded in `sums.jsonx`; without `-pull` it
 reproduces exactly those commits, fetching and fast-forwarding via an internal
-`caco3` stash branch and refusing to touch the self repo in single-repo mode.
+`lets` stash branch and refusing to touch the self repo in single-repo mode.
 
 ## Library usage
 

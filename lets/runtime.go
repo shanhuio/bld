@@ -4,7 +4,7 @@ import "io"
 
 // runtime abstracts the container backend (Docker today; other
 // runtimes in the future) used by build rules. The interface is broad on
-// purpose for v0: the goal is to capture every operation caco3 needs from
+// purpose for v0: the goal is to capture every operation lets needs from
 // the runtime in one place, even if some methods could later be split
 // into narrower capabilities.
 type runtime interface {
@@ -62,7 +62,7 @@ type pullRequest struct {
 	Tags []imageTag
 }
 
-// imageInfo holds the runtime-agnostic image metadata caco3 needs.
+// imageInfo holds the runtime-agnostic image metadata lets needs.
 type imageInfo struct {
 	// ID is the locally-assigned image identifier (typically a
 	// sha256-prefixed hash).
