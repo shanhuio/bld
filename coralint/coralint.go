@@ -3,7 +3,7 @@
 package coralint
 
 import (
-	"shanhu.io/bld/lets/subcmd"
+	"shanhu.io/bld/subcmd"
 )
 
 // register adds every built-in lint to the command list. Lints are wired

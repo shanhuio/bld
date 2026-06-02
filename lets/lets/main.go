@@ -1,7 +1,7 @@
 package main
 
 import (
-	"shanhu.io/bld/lets/subcmd"
+	"shanhu.io/bld/subcmd"
 )
 
 func cmd() *subcmd.List {
