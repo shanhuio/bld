@@ -6,6 +6,7 @@ import (
 	"io"
 	"path/filepath"
 	"sort"
+	"strings"
 )
 
 // PrintCheckResults writes a check-mode summary of results to w and returns
@@ -161,13 +162,4 @@ func relPos(p token.Position, cwd string) string {
 
 func itoa(n int) string { return fmt.Sprintf("%d", n) }
 
-func joinComma(ss []string) string {
-	s := ""
-	for i, v := range ss {
-		if i > 0 {
-			s += ", "
-		}
-		s += v
-	}
-	return s
-}
+func joinComma(ss []string) string { return strings.Join(ss, ", ") }
