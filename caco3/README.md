@@ -2,7 +2,7 @@
 
 `caco3` is a small, content-addressed build tool in the spirit of
 [Bazel](https://bazel.build/), specialized for building and running
-**OCI/Docker container images**. Build rules are declared in `BUILD.caco3`
+**OCI/Docker container images**. Build rules are declared in `BUILD.lets`
 files, wired together into a dependency graph, and executed only when their
 inputs change. Most build *actions* either produce a container image or run a
 command inside one, so containers are both a first-class output and the
@@ -15,7 +15,7 @@ thin CLI under [`caco3/`](./caco3).
 
 ### Workspace
 
-A workspace is a directory tree rooted at a `WORKSPACE.caco3` file. `caco3`
+A workspace is a directory tree rooted at a `WORKSPACE.lets` file. `caco3`
 locates the root by walking up from the current directory until it finds that
 file, so commands can be run from any subdirectory.
 
@@ -28,7 +28,7 @@ There are two layouts:
   the workspace root, external dependencies are checked out under `_/src`, and
   outputs land under `_/out`. The `_/` subtree is never scanned as source.
 
-`WORKSPACE.caco3` is a [jsonx](https://pkg.go.dev/shanhu.io/std/jsonx) document
+`WORKSPACE.lets` is a [jsonx](https://pkg.go.dev/shanhu.io/std/jsonx) document
 (JSON with comments and a typed-entry syntax). Examples:
 
 ```jsonx
@@ -54,7 +54,7 @@ additional named remotes via `ExtraRemotes`).
 
 ### BUILD files
 
-Each directory contributes rules through a `BUILD.caco3` file — again a `jsonx`
+Each directory contributes rules through a `BUILD.lets` file — again a `jsonx`
 document, parsed as a *series* of typed entries. Each entry's type selects a
 rule kind and its body fills in the rule's fields:
 
@@ -153,7 +153,7 @@ caco3 sync  [flags] [targets...]    # clone/update source repos
 Common `build` flags:
 
 - `-root <dir>` — workspace root (default: discovered by walking up to
-  `WORKSPACE.caco3`).
+  `WORKSPACE.lets`).
 - `-rebuild` — always rebuild, ignoring the cache.
 - `-docker_build_cache` — use the Docker layer build cache (default `true`).
 

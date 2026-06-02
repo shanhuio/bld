@@ -46,13 +46,13 @@ func TestE2E_buildAndRun(t *testing.T) {
 	t.Cleanup(func() { dockerRmiTags(e2eTags...) })
 
 	root := t.TempDir()
-	writeFile(t, filepath.Join(root, "WORKSPACE.caco3"), e2eWorkspace)
+	writeFile(t, filepath.Join(root, "WORKSPACE.lets"), e2eWorkspace)
 	writeFile(t,
-		filepath.Join(root, "src/test.local/proj1/dockers/BUILD.caco3"),
+		filepath.Join(root, "src/test.local/proj1/dockers/BUILD.lets"),
 		e2eProj1Build,
 	)
 	writeFile(t,
-		filepath.Join(root, "src/test.local/proj2/dockers/BUILD.caco3"),
+		filepath.Join(root, "src/test.local/proj2/dockers/BUILD.lets"),
 		e2eProj2Build,
 	)
 	writeFile(t,
@@ -178,8 +178,8 @@ func TestE2E_singleRepoNoDeps(t *testing.T) {
 	t.Cleanup(func() { dockerRmiTags(e2eSingleRepoTags...) })
 
 	root := t.TempDir()
-	writeFile(t, filepath.Join(root, "WORKSPACE.caco3"), singleRepoWorkspace)
-	writeFile(t, filepath.Join(root, "BUILD.caco3"), singleRepoBuild)
+	writeFile(t, filepath.Join(root, "WORKSPACE.lets"), singleRepoWorkspace)
+	writeFile(t, filepath.Join(root, "BUILD.lets"), singleRepoBuild)
 	writeFile(t, filepath.Join(root, "hello/Dockerfile"), singleRepoDockerfile)
 	writeFile(t, filepath.Join(root, "payload.txt"), "single-repo says hi\n")
 
@@ -267,15 +267,15 @@ func TestE2E_singleRepoWithDep(t *testing.T) {
 	root := t.TempDir()
 
 	writeFile(t,
-		filepath.Join(root, "WORKSPACE.caco3"), singleRepoWithDepWorkspace,
+		filepath.Join(root, "WORKSPACE.lets"), singleRepoWithDepWorkspace,
 	)
 	// Self-repo files at the repo root.
-	writeFile(t, filepath.Join(root, "BUILD.caco3"), e2eProj2Build)
+	writeFile(t, filepath.Join(root, "BUILD.lets"), e2eProj2Build)
 	writeFile(t, filepath.Join(root, "app/Dockerfile"), e2eAppDockerfile)
 	writeFile(t, filepath.Join(root, "payload.txt"), "hello from caco3\n")
 	// Dependency pre-checked-out under _/src.
 	writeFile(t,
-		filepath.Join(root, "_/src/test.local/proj1/dockers/BUILD.caco3"),
+		filepath.Join(root, "_/src/test.local/proj1/dockers/BUILD.lets"),
 		e2eProj1Build,
 	)
 

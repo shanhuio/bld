@@ -27,7 +27,7 @@ type Builder struct {
 	opts *buildOpts
 }
 
-const workspaceFile = "WORKSPACE.caco3"
+const workspaceFile = "WORKSPACE.lets"
 
 func findRoot(cur string) (string, error) {
 	for {

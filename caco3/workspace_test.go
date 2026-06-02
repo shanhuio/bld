@@ -8,7 +8,7 @@ import (
 
 func TestReadWorkspace_legacy(t *testing.T) {
 	dir := t.TempDir()
-	f := filepath.Join(dir, "WORKSPACE.caco3")
+	f := filepath.Join(dir, "WORKSPACE.lets")
 	src := multiLine(
 		`repo_map {`,
 		`    Src: {`,
@@ -37,7 +37,7 @@ func TestReadWorkspace_legacy(t *testing.T) {
 
 func TestReadWorkspace_withRepo(t *testing.T) {
 	dir := t.TempDir()
-	f := filepath.Join(dir, "WORKSPACE.caco3")
+	f := filepath.Join(dir, "WORKSPACE.lets")
 	src := multiLine(
 		`repo {`,
 		`    Name: "test.local/proj2/dockers",`,
@@ -76,7 +76,7 @@ func TestReadWorkspace_emptyRepoName(t *testing.T) {
 		`}`,
 	)
 	if err := os.WriteFile(
-		filepath.Join(root, "WORKSPACE.caco3"), []byte(src), 0644,
+		filepath.Join(root, "WORKSPACE.lets"), []byte(src), 0644,
 	); err != nil {
 		t.Fatalf("write: %v", err)
 	}
@@ -93,7 +93,7 @@ func TestReadWorkspace_emptyRepoName(t *testing.T) {
 
 func TestReadWorkspace_repoOnly(t *testing.T) {
 	dir := t.TempDir()
-	f := filepath.Join(dir, "WORKSPACE.caco3")
+	f := filepath.Join(dir, "WORKSPACE.lets")
 	src := multiLine(
 		`repo {`,
 		`    Name: "test.local/standalone",`,

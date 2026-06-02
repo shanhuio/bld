@@ -33,7 +33,7 @@ func listAllFiles(dir string) ([]string, error) {
 		case ".gitignore", "COPYING", "tags", ".DS_Store":
 			return nil
 		}
-		if strings.HasSuffix(name, ".caco3") {
+		if strings.HasSuffix(name, ".lets") {
 			return nil
 		}
 		typ := d.Type()

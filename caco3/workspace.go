@@ -12,7 +12,7 @@ type Workspace struct {
 	RepoMap *RepoMap
 }
 
-// Repo identifies the current repo when WORKSPACE.caco3 lives at the root
+// Repo identifies the current repo when WORKSPACE.lets lives at the root
 // of a single-repo workspace. When set, caco3 builds the repo's own rules
 // directly and resolves cross-repo dependencies under _/src.
 type Repo struct {

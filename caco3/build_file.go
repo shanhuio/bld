@@ -7,7 +7,7 @@ import (
 	"shanhu.io/std/lexing"
 )
 
-const buildFileName = "BUILD.caco3"
+const buildFileName = "BUILD.lets"
 
 func makeBuildFileNode(t string) any {
 	switch t {
