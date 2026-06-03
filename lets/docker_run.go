@@ -13,6 +13,7 @@ import (
 
 type dockerRun struct {
 	name    string
+	path    string
 	rule    *DockerRun
 	image   string
 	ins     map[string]string
@@ -60,6 +61,7 @@ func newDockerRun(_ *env, p string, r *DockerRun) *dockerRun {
 
 	return &dockerRun{
 		name:    name,
+		path:    p,
 		rule:    r,
 		image:   image,
 		ins:     ins,
@@ -99,9 +101,9 @@ func (r *dockerRun) build(env *env, opts *buildOpts) error {
 		Env:     r.envs,
 	}
 
-	if m := r.rule.MountWorkspace; m != "" {
+	if m := r.rule.MountDir; m != "" {
 		contConfig.Mounts = append(contConfig.Mounts, &docker.ContMount{
-			Host:     env.rootDir,
+			Host:     env.src(r.path),
 			Cont:     m,
 			ReadOnly: true,
 		})

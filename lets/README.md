@@ -133,7 +133,7 @@ The `-rebuild` flag forces everything to rebuild.
 | `bundle`       | Group other rules under one name; no action of its own.                 |
 | `docker_pull`  | Pull an image from a registry and tag it locally. Optionally pins a `Digest` and verifies it; optionally saves a `.tar` output. |
 | `docker_build` | Build an image from a `Dockerfile` plus a build context assembled from `Input` files, `ArchiveInput` zips, and `From` base-image rules. |
-| `docker_run`   | Run a one-shot container against an image. Copies `Input`/`ArchiveInput` in, runs `Command`, copies `Output` files back out; supports `Env`, `WorkDir`, and a read-only `MountWorkspace`. |
+| `docker_run`   | Run a one-shot container against an image. Copies `Input`/`ArchiveInput` in, runs `Command`, copies `Output` files back out; supports `Env`, `WorkDir`, and a read-only `MountDir` (the rule's own build-file directory). |
 | `download`     | Download a URL to an output file and verify its `sha256:` checksum.     |
 | `sub_builds`   | List additional directories whose BUILD files should be loaded.         |
 

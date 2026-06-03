@@ -66,7 +66,9 @@ type DockerRun struct {
 	Envs    []string `json:",omitempty"`
 	WorkDir string   `json:",omitempty"`
 
-	MountWorkspace string `json:",omitempty"`
+	// MountDir, if set, bind-mounts the directory containing this rule's
+	// build file read-only at this path inside the container.
+	MountDir string `json:",omitempty"`
 
 	Command []string `json:",omitempty"`
 
