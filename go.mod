@@ -2,6 +2,8 @@ module shanhu.io/bld
 
 go 1.26
 
+toolchain go1.26.4
+
 require (
 	golang.org/x/tools v0.46.0
 	modernc.org/sqlite v1.52.0
