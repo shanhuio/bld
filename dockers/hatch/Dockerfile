@@ -1,4 +1,4 @@
-FROM cr.shanhu.io/lib/base
+FROM cr.shanhu.io/bld/base
 LABEL author="Shanhu Tech Inc."
 
 RUN apk update && apk add --no-cache musl-dev bash go

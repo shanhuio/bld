@@ -64,8 +64,8 @@ func TestNameToRepoTag(t *testing.T) {
 			want: "cr.shanhu.io/x/base",
 		},
 		{
-			name: "shanhu.io/lib/web-dockers/app",
-			want: "cr.shanhu.io/lib/app",
+			name: "shanhu.io/bld/web-dockers/app",
+			want: "cr.shanhu.io/bld/app",
 		},
 
 		// Errors.

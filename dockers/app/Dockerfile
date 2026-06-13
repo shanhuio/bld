@@ -1,4 +1,4 @@
-FROM cr.shanhu.io/lib/base
+FROM cr.shanhu.io/bld/base
 LABEL author="Shanhu Tech Inc."
 
 RUN adduser -D -u 3000 app

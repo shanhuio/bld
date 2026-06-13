@@ -1,4 +1,4 @@
-FROM cr.shanhu.io/lib/golang
+FROM cr.shanhu.io/bld/golang
 LABEL author="Shanhu Tech Inc."
 
 RUN mkdir /usr/local/idle
