@@ -19,32 +19,26 @@ A workspace is a directory tree rooted at a `WORKSPACE.lets` file. `lets`
 locates the root by walking up from the current directory until it finds that
 file, so commands can be run from any subdirectory.
 
-There are two layouts:
-
-- **Multi-repo** (`repo_map`): source repositories are checked out under
-  `src/<repo-path>/...`, build outputs go to `out/`. The workspace lists the
-  repos it depends on and `lets sync` clones/updates them.
-- **Single-repo** (`repo`): the workspace *is* one repo. Its own files live at
-  the workspace root, external dependencies are checked out under `_/src`, and
-  outputs land under `_/out`. The `_/` subtree is never scanned as source.
+The workspace *is* one repo, named by a `repo` node. Its own files live at the
+workspace root, external dependencies are checked out under `_/src`, and build
+outputs land under `_/out`. The `_/` subtree is never scanned as source.
+Dependencies are listed in a `repo_map`, which `lets sync` clones/updates.
 
 `WORKSPACE.lets` is a [jsonx](https://pkg.go.dev/shanhu.io/std/jsonx) document
-(JSON with comments and a typed-entry syntax). Examples:
+(JSON with comments and a typed-entry syntax):
 
 ```jsonx
-// Multi-repo: declare the source repos to pull in.
+// Name the self repo: lets builds its rules directly.
+repo {
+    Name: "git.example.com/standalone/dockers",
+}
+
+// Declare the dependency repos to check out under _/src.
 repo_map {
     Src: {
         "git.example.com/proj1/dockers": "",
         "git.example.com/proj2/dockers": "",
     },
-}
-```
-
-```jsonx
-// Single-repo: this repo builds its own rules directly.
-repo {
-    Name: "git.example.com/standalone/dockers",
 }
 ```
 
@@ -165,7 +159,7 @@ Common `build` flags:
 
 `sync` pins each repo to a commit recorded in `sums.jsonx`; without `-pull` it
 reproduces exactly those commits, fetching and fast-forwarding via an internal
-`lets` stash branch and refusing to touch the self repo in single-repo mode.
+`lets` stash branch and refusing to touch the self repo at the workspace root.
 
 ## Library usage
 

@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"shanhu.io/std/docker"
 	"shanhu.io/std/lexing"
@@ -65,19 +64,12 @@ func NewBuilder(workDir string, config *Config) (*Builder, error) {
 		root = dir
 	}
 
-	srcDir := filepath.Join(root, "src")
-	workSrcPath := ""
-	if strings.HasPrefix(workDir, srcDir+"/") {
-		workSrcPath = filepath.ToSlash(strings.TrimPrefix(workDir, srcDir+"/"))
-	}
-
+	// srcDir, outDir and workSrcPath are filled in by setupSingleRepo once
+	// ReadWorkspace has read the self repo's name from the workspace.
 	env := &env{
-		dock:        docker.NewUnixClient(""),
-		rootDir:     root,
-		workDir:     workDir,
-		workSrcPath: workSrcPath,
-		srcDir:      srcDir,
-		outDir:      filepath.Join(root, "out"),
+		dock:    docker.NewUnixClient(""),
+		rootDir: root,
+		workDir: workDir,
 	}
 	opts := &buildOpts{
 		log:           os.Stderr,
@@ -93,10 +85,9 @@ func NewBuilder(workDir string, config *Config) (*Builder, error) {
 }
 
 // ReadWorkspace reads and loads the WORKSPACE file into the build env.
-// When the workspace declares a `repo` node, the env is switched into
-// single-repo mode: srcDir / outDir move under _/src and _/out, and
-// the env learns to redirect paths under the self-repo name back to
-// the workspace root.
+// The workspace must declare a `repo` node naming the self repo: srcDir /
+// outDir live under _/src and _/out, and the env redirects paths under the
+// self-repo name back to the workspace root.
 func (b *Builder) ReadWorkspace() (*Workspace, []*lexing.Error) {
 	if b.env.workspace != nil {
 		return b.env.workspace, nil
@@ -108,15 +99,18 @@ func (b *Builder) ReadWorkspace() (*Workspace, []*lexing.Error) {
 	}
 	b.env.workspace = ws
 
-	if ws.Repo != nil {
-		if ws.Repo.Name == "" {
-			return nil, lexing.SingleErr(
-				errors.New("repo.Name must not be empty"),
-			)
-		}
-		if err := b.env.setupSingleRepo(ws.Repo.Name); err != nil {
-			return nil, lexing.SingleErr(err)
-		}
+	if ws.Repo == nil {
+		return nil, lexing.SingleErr(
+			errors.New("workspace must declare a repo node"),
+		)
+	}
+	if ws.Repo.Name == "" {
+		return nil, lexing.SingleErr(
+			errors.New("repo.Name must not be empty"),
+		)
+	}
+	if err := b.env.setupSingleRepo(ws.Repo.Name); err != nil {
+		return nil, lexing.SingleErr(err)
 	}
 	return ws, nil
 }

@@ -1,7 +1,6 @@
 package lets
 
 import (
-	"errors"
 	"io/fs"
 	"os"
 	"sort"
@@ -161,20 +160,13 @@ func loadNodes(env *env, names []string) (
 ) {
 	l := newLoader(env)
 
-	repoMap := env.workspace.RepoMap
 	dirSet := make(map[string]bool)
-	if repoMap != nil {
+	if repoMap := env.workspace.RepoMap; repoMap != nil {
 		for dir := range repoMap.Src {
 			dirSet[dir] = true
 		}
 	}
-	if env.repoName != "" {
-		dirSet[env.repoName] = true
-	}
-	if len(dirSet) == 0 {
-		err := errors.New("nothing to load: no repo and no repo_map.Src")
-		return nil, nil, lexing.SingleErr(err)
-	}
+	dirSet[env.repoName] = true
 	dirs := make([]string, 0, len(dirSet))
 	for dir := range dirSet {
 		dirs = append(dirs, dir)

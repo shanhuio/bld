@@ -6,9 +6,8 @@ import (
 	"testing"
 )
 
-func TestReadWorkspace_legacy(t *testing.T) {
-	dir := t.TempDir()
-	f := filepath.Join(dir, "WORKSPACE.lets")
+func TestReadWorkspace_noRepo(t *testing.T) {
+	root := t.TempDir()
 	src := multiLine(
 		`repo_map {`,
 		`    Src: {`,
@@ -16,22 +15,18 @@ func TestReadWorkspace_legacy(t *testing.T) {
 		`    },`,
 		`}`,
 	)
-	if err := os.WriteFile(f, []byte(src), 0644); err != nil {
+	if err := os.WriteFile(
+		filepath.Join(root, "WORKSPACE.lets"), []byte(src), 0644,
+	); err != nil {
 		t.Fatalf("write: %v", err)
 	}
 
-	ws, errs := readWorkspace(f)
-	if errs != nil {
-		t.Fatalf("readWorkspace: %v", errs)
+	b, err := NewBuilder(root, &Config{Root: root})
+	if err != nil {
+		t.Fatalf("NewBuilder: %v", err)
 	}
-	if ws.Repo != nil {
-		t.Errorf("Repo = %+v, want nil for legacy workspace", ws.Repo)
-	}
-	if ws.RepoMap == nil {
-		t.Fatal("RepoMap = nil")
-	}
-	if got := ws.RepoMap.Src["test.local/proj1/dockers"]; got != "git@example.com:p1.git" {
-		t.Errorf("Src entry = %q, want git@example.com:p1.git", got)
+	if _, errs := b.ReadWorkspace(); errs == nil {
+		t.Fatal("ReadWorkspace: want error for workspace without repo node, got nil")
 	}
 }
 

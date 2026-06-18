@@ -20,10 +20,10 @@ type env struct {
 	srcDir string
 	outDir string
 
-	// repoName is the canonical name of the self repo when running
-	// in single-repo mode. Empty in legacy mode. When non-empty,
-	// src() redirects paths under repoName/ to rootDir, and srcDir
-	// is <rootDir>/_/src.
+	// repoName is the canonical name of the self repo, taken from the
+	// workspace's repo node. src() redirects paths under repoName/ to
+	// rootDir, while dependency paths resolve under srcDir
+	// (<rootDir>/_/src).
 	repoName string
 
 	workspace *Workspace // Lazily loaded.
@@ -58,7 +58,7 @@ func (e *env) out(ps ...string) string {
 }
 
 func (e *env) src(ps ...string) string {
-	if e.repoName != "" && len(ps) > 0 {
+	if len(ps) > 0 {
 		full := path.Join(ps...)
 		if full == e.repoName || strings.HasPrefix(full, e.repoName+"/") {
 			rest := strings.TrimPrefix(full, e.repoName)
@@ -77,30 +77,29 @@ func (e *env) srcName(physical string) (string, error) {
 	if rel, ok := pathUnder(e.srcDir, physical); ok {
 		return filepath.ToSlash(rel), nil
 	}
-	if e.repoName != "" {
-		if rel, ok := pathUnder(e.rootDir, physical); ok {
-			if rel == "" {
-				return e.repoName, nil
-			}
-			return path.Join(e.repoName, filepath.ToSlash(rel)), nil
+	if rel, ok := pathUnder(e.rootDir, physical); ok {
+		if rel == "" {
+			return e.repoName, nil
 		}
+		return path.Join(e.repoName, filepath.ToSlash(rel)), nil
 	}
 	return "", fmt.Errorf("path %q is outside any source root", physical)
 }
 
-// setupSingleRepo flips the env into single-repo mode, re-rooting srcDir
-// and outDir under _/src and _/out and recomputing workSrcPath relative
-// to the self repo. Called from ReadWorkspace.
+// setupSingleRepo wires the env to the self repo named in the workspace,
+// rooting srcDir and outDir under _/src and _/out and computing
+// workSrcPath relative to the self repo. Called from ReadWorkspace.
 func (e *env) setupSingleRepo(name string) error {
 	e.repoName = name
 	e.srcDir = filepath.Join(e.rootDir, "_", "src")
 	e.outDir = filepath.Join(e.rootDir, "_", "out")
 
-	// If we're inside _/src, behave like legacy mode and report the
-	// relative path. Otherwise we're in the self repo and the logical
-	// workSrcPath is name + (rel from rootDir).
-	if strings.HasPrefix(e.workDir, e.srcDir+string(filepath.Separator)) {
-		rel := strings.TrimPrefix(e.workDir, e.srcDir+string(filepath.Separator))
+	// If we're inside _/src, we're under a dependency checkout, so report
+	// the path relative to it. Otherwise we're in the self repo and the
+	// logical workSrcPath is name + (rel from rootDir).
+	if rel, ok := strings.CutPrefix(
+		e.workDir, e.srcDir+string(filepath.Separator),
+	); ok {
 		e.workSrcPath = filepath.ToSlash(rel)
 		return nil
 	}

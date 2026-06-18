@@ -12,9 +12,9 @@ type Workspace struct {
 	RepoMap *RepoMap
 }
 
-// Repo identifies the current repo when WORKSPACE.lets lives at the root
-// of a single-repo workspace. When set, lets builds the repo's own rules
-// directly and resolves cross-repo dependencies under _/src.
+// Repo names the self repo of the workspace. It is required: lets builds
+// this repo's own rules directly from the workspace root and resolves
+// cross-repo dependencies under _/src.
 type Repo struct {
 	Name string
 }
