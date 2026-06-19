@@ -1,15 +1,13 @@
 FROM cr.shanhu.io/bld/base
 LABEL author="Shanhu Tech Inc."
 
+COPY idle.go /tmp/idle.go
 RUN <<EOF
 #!/bin/sh
 
 set -euo pipefail
 
 apk update && apk add --no-cache musl-dev bash go
-mkdir /hatch
+cd /tmp && go build -o /bin/idle idle.go
 EOF
-COPY idle.go /hatch/idle.go
-RUN cd /hatch && go build idle.go
-WORKDIR /hatch
-CMD ["/hatch/idle"]
+CMD ["/bin/idle"]
