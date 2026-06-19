@@ -1,4 +1,10 @@
 FROM cr.shanhu.io/bld/alpine
 LABEL author="Shanhu Tech Inc."
-RUN apk update
-RUN apk add ca-certificates && update-ca-certificates
+RUN <<EOF
+#!/bin/sh
+
+set -euo pipefail
+
+apk update
+apk add ca-certificates && update-ca-certificates
+EOF
