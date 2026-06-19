@@ -46,8 +46,7 @@ repo {
 ```
 
 In `Deps`, an empty repo URL is derived automatically as
-`git@<host>:<path>.git` (overridable per host via `GitHosting`, and with
-additional named remotes via `ExtraRemotes`).
+`git@<host>:<path>.git` (overridable per host via `GitHosting`).
 
 ### BUILD files
 

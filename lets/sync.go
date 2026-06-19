@@ -220,39 +220,24 @@ func syncRepos(env *env, sums *RepoSums, opts *SyncOptions) (
 				return nil, fmt.Errorf("list remotes: %w", err)
 			}
 
-			var wants []*gitRemote
-			wants = append(wants, &gitRemote{
-				name: "origin",
-				git:  repos[dir],
-			})
-			for _, extra := range repo.ExtraRemotes {
-				if url, ok := extra.URL[dir]; ok {
-					wants = append(wants, &gitRemote{
-						name: extra.Name,
-						git:  url,
-					})
+			want := &gitRemote{name: "origin", git: repos[dir]}
+			if cur, ok := remotes[want.name]; !ok {
+				log.Printf("%q: add remote %q", dir, want.name)
+				if err := runCmd(
+					srcDir, "git", "remote", "add", want.name, want.git,
+				); err != nil {
+					return nil, fmt.Errorf(
+						"add git remote %q for %q: %w", want.name, dir, err,
+					)
 				}
-			}
-
-			for _, r := range wants {
-				if cur, ok := remotes[r.name]; !ok {
-					log.Printf("%q: add remote %q", dir, r.name)
-					if err := runCmd(
-						srcDir, "git", "remote", "add", r.name, r.git,
-					); err != nil {
-						return nil, fmt.Errorf(
-							"add git remote %q for %q: %w", r.name, dir, err,
-						)
-					}
-				} else if cur.git != r.git {
-					log.Printf("%q: set remote %q", dir, r.name)
-					if err := runCmd(
-						srcDir, "git", "remote", "set-url", r.name, r.git,
-					); err != nil {
-						return nil, fmt.Errorf(
-							"set git remote %q for %q: %w", r.name, dir, err,
-						)
-					}
+			} else if cur.git != want.git {
+				log.Printf("%q: set remote %q", dir, want.name)
+				if err := runCmd(
+					srcDir, "git", "remote", "set-url", want.name, want.git,
+				); err != nil {
+					return nil, fmt.Errorf(
+						"set git remote %q for %q: %w", want.name, dir, err,
+					)
 				}
 			}
 		}

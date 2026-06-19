@@ -34,16 +34,6 @@ type Repo struct {
 	// GitHosting overrides the git host for a domain when deriving an
 	// empty Deps URL.
 	GitHosting map[string]string `json:",omitempty"`
-
-	// ExtraRemotes adds named remotes to the checked-out dependency repos.
-	ExtraRemotes []*GitRemote `json:",omitempty"`
-}
-
-// GitRemote defines a set of remote URLs for a given name. It provides a more
-// consistent remote setup for the repositories in the workspace.
-type GitRemote struct {
-	Name string
-	URL  map[string]string
 }
 
 // readWorkspace reads the workspace declaration from the leading repo block
