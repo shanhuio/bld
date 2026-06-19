@@ -147,16 +147,16 @@ func syncRepos(env *env, sums *RepoSums, opts *SyncOptions) (
 ) {
 	ws := env.workspace
 
-	repoMap := ws.RepoMap
-	if repoMap == nil {
-		repoMap = &RepoMap{}
+	repo := ws.Repo
+	if repo == nil {
+		repo = &Repo{}
 	}
 
 	var dirs []string
-	for dir := range repoMap.Src {
+	for dir := range repo.Deps {
 		// The self repo lives at the workspace root and must not be
 		// touched by sync. Skip it even if the user has listed it
-		// explicitly under Src.
+		// explicitly under Deps.
 		if dir == env.repoName {
 			continue
 		}
@@ -164,14 +164,14 @@ func syncRepos(env *env, sums *RepoSums, opts *SyncOptions) (
 	}
 	sort.Strings(dirs)
 
-	gitHosting := repoMap.GitHosting
+	gitHosting := repo.GitHosting
 	if gitHosting == nil {
 		gitHosting = make(map[string]string)
 	}
 	repos := make(map[string]string)
 	for _, dir := range dirs {
-		repo := repoMap.Src[dir]
-		if repo == "" {
+		git := repo.Deps[dir]
+		if git == "" {
 			domain, p, ok := strings.Cut(dir, "/")
 			if !ok {
 				domain = dir
@@ -181,9 +181,9 @@ func syncRepos(env *env, sums *RepoSums, opts *SyncOptions) (
 			if alt, found := gitHosting[domain]; found {
 				gitHost = alt
 			}
-			repo = fmt.Sprintf("git@%s:%s.git", gitHost, p)
+			git = fmt.Sprintf("git@%s:%s.git", gitHost, p)
 		}
-		repos[dir] = repo
+		repos[dir] = git
 	}
 
 	curSums := &RepoSums{
@@ -225,7 +225,7 @@ func syncRepos(env *env, sums *RepoSums, opts *SyncOptions) (
 				name: "origin",
 				git:  repos[dir],
 			})
-			for _, extra := range repoMap.ExtraRemotes {
+			for _, extra := range repo.ExtraRemotes {
 				if url, ok := extra.URL[dir]; ok {
 					wants = append(wants, &gitRemote{
 						name: extra.Name,

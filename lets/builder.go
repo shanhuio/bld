@@ -26,14 +26,14 @@ type Builder struct {
 	opts *buildOpts
 }
 
-const workspaceFile = "WORKSPACE.lets"
-
+// findRoot walks up from cur to the workspace root: the first directory that
+// contains a .letsroot stamp file or a .git directory. This is a stat-only
+// check, so no files are opened.
 func findRoot(cur string) (string, error) {
 	for {
-		f := filepath.Join(cur, workspaceFile)
-		ok, err := isRegularFile(f)
+		ok, err := isRepoRoot(cur)
 		if err != nil {
-			return "", fmt.Errorf("check %q: %w", f, err)
+			return "", err
 		}
 		if ok {
 			return cur, nil
@@ -44,6 +44,19 @@ func findRoot(cur string) (string, error) {
 		cur = filepath.Dir(cur)
 	}
 	return "", errors.New("not in a workspace")
+}
+
+// isRepoRoot reports whether dir is a workspace root: it holds a .letsroot
+// stamp file or a .git directory.
+func isRepoRoot(dir string) (bool, error) {
+	stamp, err := isRegularFile(filepath.Join(dir, letsRootFile))
+	if err != nil {
+		return false, err
+	}
+	if stamp {
+		return true, nil
+	}
+	return isDir(filepath.Join(dir, ".git"))
 }
 
 // NewBuilder creates a new builder that builds stuff.
@@ -84,16 +97,16 @@ func NewBuilder(workDir string, config *Config) (*Builder, error) {
 	}, nil
 }
 
-// ReadWorkspace reads and loads the WORKSPACE file into the build env.
-// The workspace must declare a `repo` node naming the self repo: srcDir /
-// outDir live under _/src and _/out, and the env redirects paths under the
-// self-repo name back to the workspace root.
+// ReadWorkspace reads the workspace declaration from the leading repo block
+// of the root BUILD.lets file into the build env. The repo block must name
+// the self repo: srcDir / outDir live under _/src and _/out, and the env
+// redirects paths under the self-repo name back to the workspace root.
 func (b *Builder) ReadWorkspace() (*Workspace, []*lexing.Error) {
 	if b.env.workspace != nil {
 		return b.env.workspace, nil
 	}
 
-	ws, errs := readWorkspace(b.env.root(workspaceFile))
+	ws, errs := readWorkspace(b.env.root(buildFileName))
 	if errs != nil {
 		return nil, errs
 	}

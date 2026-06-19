@@ -50,17 +50,14 @@ func TestSyncRepos_skipsSelf(t *testing.T) {
 	ws := multiLine(
 		`repo {`,
 		`    Name: "test.local/self/dockers",`,
-		`}`,
-		``,
-		`repo_map {`,
-		`    Src: {`,
+		`    Deps: {`,
 		`        "test.local/self/dockers": "",`,
 		`        "test.local/dep/dockers": "`+bare+`",`,
 		`    },`,
 		`}`,
 	)
 	if err := os.WriteFile(
-		filepath.Join(root, "WORKSPACE.lets"), []byte(ws), 0644,
+		filepath.Join(root, buildFileName), []byte(ws), 0644,
 	); err != nil {
 		t.Fatalf("write workspace: %v", err)
 	}
@@ -115,7 +112,7 @@ func TestSyncRepos_noDeps(t *testing.T) {
 		`}`,
 	)
 	if err := os.WriteFile(
-		filepath.Join(root, "WORKSPACE.lets"), []byte(ws), 0644,
+		filepath.Join(root, buildFileName), []byte(ws), 0644,
 	); err != nil {
 		t.Fatalf("write workspace: %v", err)
 	}

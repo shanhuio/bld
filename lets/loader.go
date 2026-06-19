@@ -161,10 +161,8 @@ func loadNodes(env *env, names []string) (
 	l := newLoader(env)
 
 	dirSet := make(map[string]bool)
-	if repoMap := env.workspace.RepoMap; repoMap != nil {
-		for dir := range repoMap.Src {
-			dirSet[dir] = true
-		}
+	for dir := range env.workspace.Repo.Deps {
+		dirSet[dir] = true
 	}
 	dirSet[env.repoName] = true
 	dirs := make([]string, 0, len(dirSet))

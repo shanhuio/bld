@@ -52,7 +52,7 @@ func TestListAllFiles_ignores(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "tags"), "t")
 	writeFile(t, filepath.Join(dir, ".DS_Store"), "d")
 	writeFile(t, filepath.Join(dir, "BUILD.lets"), "b")
-	writeFile(t, filepath.Join(dir, "WORKSPACE.lets"), "w")
+	writeFile(t, filepath.Join(dir, ".letsroot"), "")
 	writeFile(t, filepath.Join(dir, ".git", "config"), "x")
 	writeFile(t, filepath.Join(dir, "_", "src", "dep", "d.go"), "x")
 	writeFile(t, filepath.Join(dir, "sub", "regular.go"), "r")

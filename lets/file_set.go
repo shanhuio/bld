@@ -30,7 +30,7 @@ func listAllFiles(dir string) ([]string, error) {
 		}
 		name := d.Name()
 		switch name {
-		case ".gitignore", "COPYING", "tags", ".DS_Store":
+		case ".gitignore", "COPYING", "tags", ".DS_Store", letsRootFile:
 			return nil
 		}
 		if strings.HasSuffix(name, ".lets") {

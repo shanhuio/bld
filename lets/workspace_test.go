@@ -9,14 +9,12 @@ import (
 func TestReadWorkspace_noRepo(t *testing.T) {
 	root := t.TempDir()
 	src := multiLine(
-		`repo_map {`,
-		`    Src: {`,
-		`        "test.local/proj1/dockers": "git@example.com:p1.git",`,
-		`    },`,
+		`bundle {`,
+		`    Name: "all",`,
 		`}`,
 	)
 	if err := os.WriteFile(
-		filepath.Join(root, "WORKSPACE.lets"), []byte(src), 0644,
+		filepath.Join(root, buildFileName), []byte(src), 0644,
 	); err != nil {
 		t.Fatalf("write: %v", err)
 	}
@@ -30,18 +28,39 @@ func TestReadWorkspace_noRepo(t *testing.T) {
 	}
 }
 
-func TestReadWorkspace_withRepo(t *testing.T) {
+func TestReadWorkspace_repoNotFirst(t *testing.T) {
 	dir := t.TempDir()
-	f := filepath.Join(dir, "WORKSPACE.lets")
+	f := filepath.Join(dir, buildFileName)
+	src := multiLine(
+		`bundle {`,
+		`    Name: "all",`,
+		`}`,
+		``,
+		`repo {`,
+		`    Name: "test.local/proj/dockers",`,
+		`}`,
+	)
+	if err := os.WriteFile(f, []byte(src), 0644); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	if _, errs := readWorkspace(f); errs == nil {
+		t.Fatal("readWorkspace: want error for repo not first, got nil")
+	}
+}
+
+func TestReadWorkspace_withDeps(t *testing.T) {
+	dir := t.TempDir()
+	f := filepath.Join(dir, buildFileName)
 	src := multiLine(
 		`repo {`,
 		`    Name: "test.local/proj2/dockers",`,
-		`}`,
-		``,
-		`repo_map {`,
-		`    Src: {`,
+		`    Deps: {`,
 		`        "test.local/proj1/dockers": "git@example.com:p1.git",`,
 		`    },`,
+		`}`,
+		``,
+		`bundle {`,
+		`    Name: "all",`,
 		`}`,
 	)
 	if err := os.WriteFile(f, []byte(src), 0644); err != nil {
@@ -58,8 +77,9 @@ func TestReadWorkspace_withRepo(t *testing.T) {
 	if got, want := ws.Repo.Name, "test.local/proj2/dockers"; got != want {
 		t.Errorf("Repo.Name = %q, want %q", got, want)
 	}
-	if ws.RepoMap == nil {
-		t.Fatal("RepoMap = nil")
+	got := ws.Repo.Deps["test.local/proj1/dockers"]
+	if want := "git@example.com:p1.git"; got != want {
+		t.Errorf("Deps entry = %q, want %q", got, want)
 	}
 }
 
@@ -71,7 +91,7 @@ func TestReadWorkspace_emptyRepoName(t *testing.T) {
 		`}`,
 	)
 	if err := os.WriteFile(
-		filepath.Join(root, "WORKSPACE.lets"), []byte(src), 0644,
+		filepath.Join(root, buildFileName), []byte(src), 0644,
 	); err != nil {
 		t.Fatalf("write: %v", err)
 	}
@@ -88,7 +108,7 @@ func TestReadWorkspace_emptyRepoName(t *testing.T) {
 
 func TestReadWorkspace_repoOnly(t *testing.T) {
 	dir := t.TempDir()
-	f := filepath.Join(dir, "WORKSPACE.lets")
+	f := filepath.Join(dir, buildFileName)
 	src := multiLine(
 		`repo {`,
 		`    Name: "test.local/standalone",`,
@@ -105,7 +125,45 @@ func TestReadWorkspace_repoOnly(t *testing.T) {
 	if ws.Repo == nil || ws.Repo.Name != "test.local/standalone" {
 		t.Errorf("Repo = %+v, want Name=test.local/standalone", ws.Repo)
 	}
-	if ws.RepoMap != nil {
-		t.Errorf("RepoMap = %+v, want nil", ws.RepoMap)
+	if ws.Repo.Deps != nil {
+		t.Errorf("Deps = %+v, want nil", ws.Repo.Deps)
+	}
+}
+
+func TestFindRoot_letsRootStamp(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, filepath.Join(root, letsRootFile), "")
+
+	sub := filepath.Join(root, "a", "b")
+	if err := os.MkdirAll(sub, 0755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+
+	got, err := findRoot(sub)
+	if err != nil {
+		t.Fatalf("findRoot: %v", err)
+	}
+	if got != root {
+		t.Errorf("findRoot(%q) = %q, want %q", sub, got, root)
+	}
+}
+
+func TestFindRoot_gitDir(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, ".git"), 0755); err != nil {
+		t.Fatalf("mkdir .git: %v", err)
+	}
+
+	sub := filepath.Join(root, "pkg")
+	if err := os.MkdirAll(sub, 0755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+
+	got, err := findRoot(sub)
+	if err != nil {
+		t.Fatalf("findRoot: %v", err)
+	}
+	if got != root {
+		t.Errorf("findRoot(%q) = %q, want %q", sub, got, root)
 	}
 }

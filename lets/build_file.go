@@ -11,6 +11,8 @@ const buildFileName = "BUILD.lets"
 
 func makeBuildFileNode(t string) any {
 	switch t {
+	case repoEntry:
+		return new(Repo)
 	case ruleFileSet:
 		return new(FileSet)
 	case ruleBundle:
@@ -52,7 +54,16 @@ func readBuildFile(env *env, p string) ([]*buildNode, []*lexing.Error) {
 
 	errList := lexing.NewErrorList()
 
-	for _, r := range rules {
+	for i, r := range rules {
+		if _, ok := r.V.(*Repo); ok {
+			// The leading repo block configures the workspace; it is read
+			// by ReadWorkspace and is not a build rule.
+			if i != 0 {
+				errList.Errorf(r.Pos, "repo must be the first entry")
+			}
+			continue
+		}
+
 		node := &buildNode{
 			typ:      nodeRule,
 			pos:      r.Pos,

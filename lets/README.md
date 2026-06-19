@@ -15,34 +15,37 @@ thin CLI under [`lets/`](./lets).
 
 ### Workspace
 
-A workspace is a directory tree rooted at a `WORKSPACE.lets` file. `lets`
-locates the root by walking up from the current directory until it finds that
-file, so commands can be run from any subdirectory.
+A workspace is a directory tree rooted at a repo. `lets` locates the root by
+walking up from the current directory to the first directory that holds a
+`.letsroot` stamp file or a `.git` directory, so commands can be run from any
+subdirectory. (A bare `.git` repo therefore works as a root without an extra
+stamp.)
 
-The workspace *is* one repo, named by a `repo` node. Its own files live at the
-workspace root, external dependencies are checked out under `_/src`, and build
-outputs land under `_/out`. The `_/` subtree is never scanned as source.
-Dependencies are listed in a `repo_map`, which `lets sync` clones/updates.
+The workspace *is* one repo, configured by the `repo` block at the head of the
+root `BUILD.lets`. Its own files live at the workspace root, external
+dependencies are checked out under `_/src`, and build outputs land under
+`_/out`. The `_/` subtree is never scanned as source. The repo's `Deps` list
+the dependency repos, which `lets sync` clones/updates.
 
-`WORKSPACE.lets` is a [jsonx](https://pkg.go.dev/shanhu.io/std/jsonx) document
-(JSON with comments and a typed-entry syntax):
+The root `BUILD.lets` is a [jsonx](https://pkg.go.dev/shanhu.io/std/jsonx)
+document (JSON with comments and a typed-entry syntax). The `repo` block must
+be its first entry, ahead of any build rules:
 
 ```jsonx
-// Name the self repo: lets builds its rules directly.
+// Name the self repo and list its dependency repos. lets builds the self
+// repo's rules directly and checks the deps out under _/src.
 repo {
     Name: "git.example.com/standalone/dockers",
-}
-
-// Declare the dependency repos to check out under _/src.
-repo_map {
-    Src: {
+    Deps: {
         "git.example.com/proj1/dockers": "",
         "git.example.com/proj2/dockers": "",
     },
 }
+
+// ... build rules follow ...
 ```
 
-For `repo_map`, an empty repo URL is derived automatically as
+In `Deps`, an empty repo URL is derived automatically as
 `git@<host>:<path>.git` (overridable per host via `GitHosting`, and with
 additional named remotes via `ExtraRemotes`).
 
@@ -146,8 +149,8 @@ lets sync  [flags] [targets...]    # clone/update source repos
 
 Common `build` flags:
 
-- `-root <dir>` — workspace root (default: discovered by walking up to
-  `WORKSPACE.lets`).
+- `-root <dir>` — workspace root (default: discovered by walking up to a
+  `.letsroot` stamp file or a `.git` directory).
 - `-rebuild` — always rebuild, ignoring the cache.
 - `-docker_build_cache` — use the Docker layer build cache (default `true`).
 

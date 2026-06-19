@@ -37,91 +37,6 @@ func dockerRmiTags(refs ...string) {
 	}
 }
 
-func TestE2E_buildAndRun(t *testing.T) {
-	requireDocker(t)
-
-	// Pre-test cleanup: remove any leftover tags so AlwaysRebuild starts
-	// from a clean slate. Re-run cleanup after the test as well.
-	dockerRmiTags(e2eTags...)
-	t.Cleanup(func() { dockerRmiTags(e2eTags...) })
-
-	root := t.TempDir()
-	writeFile(t, filepath.Join(root, "WORKSPACE.lets"), e2eWorkspace)
-	writeFile(t,
-		filepath.Join(root, "src/test.local/proj1/dockers/BUILD.lets"),
-		e2eProj1Build,
-	)
-	writeFile(t,
-		filepath.Join(root, "src/test.local/proj2/dockers/BUILD.lets"),
-		e2eProj2Build,
-	)
-	writeFile(t,
-		filepath.Join(root, "src/test.local/proj2/dockers/app/Dockerfile"),
-		e2eAppDockerfile,
-	)
-	writeFile(t,
-		filepath.Join(root, "src/test.local/proj2/dockers/payload.txt"),
-		"hello from lets\n",
-	)
-
-	b, err := NewBuilder(root, &Config{Root: root, AlwaysRebuild: true})
-	if err != nil {
-		t.Fatalf("NewBuilder: %v", err)
-	}
-	if _, errs := b.ReadWorkspace(); errs != nil {
-		for _, e := range errs {
-			t.Error(e)
-		}
-		t.FailNow()
-	}
-
-	// Building verify pulls smoke in transitively (verify depends on
-	// smoke's result.txt output), which in turn pulls in app and
-	// alpine.
-	targets := []string{"test.local/proj2/dockers/verify"}
-	if errs := b.Build(targets); errs != nil {
-		for _, e := range errs {
-			t.Error(e)
-		}
-		t.FailNow()
-	}
-
-	outDir := filepath.Join(root, "out/test.local/proj2/dockers")
-
-	// smoke wrote /result.txt out of the first container.
-	bs, err := os.ReadFile(filepath.Join(outDir, "result.txt"))
-	if err != nil {
-		t.Fatalf("read smoke output: %v", err)
-	}
-	if got, want := string(bs), "hello from lets\n"; got != want {
-		t.Errorf("smoke output = %q, want %q", got, want)
-	}
-
-	// verify consumed smoke's result.txt as input and re-emitted it.
-	bs, err = os.ReadFile(filepath.Join(outDir, "verified.txt"))
-	if err != nil {
-		t.Fatalf("read verify output: %v", err)
-	}
-	if got, want := string(bs), "hello from lets\n"; got != want {
-		t.Errorf("verify output = %q, want %q", got, want)
-	}
-
-	// The built image must exist locally.
-	if err := exec.Command(
-		"docker", "image", "inspect", "test.local/proj2/app:latest",
-	).Run(); err != nil {
-		t.Errorf("docker image inspect on built image: %v", err)
-	}
-}
-
-const e2eWorkspace = `repo_map {
-    Src: {
-        "test.local/proj1/dockers": "",
-        "test.local/proj2/dockers": "",
-    },
-}
-`
-
 const e2eProj1Build = `docker_pull {
     Name: "alpine",
     Pull: "alpine:3.23",
@@ -178,8 +93,10 @@ func TestE2E_singleRepoNoDeps(t *testing.T) {
 	t.Cleanup(func() { dockerRmiTags(e2eSingleRepoTags...) })
 
 	root := t.TempDir()
-	writeFile(t, filepath.Join(root, "WORKSPACE.lets"), singleRepoWorkspace)
-	writeFile(t, filepath.Join(root, "BUILD.lets"), singleRepoBuild)
+	writeFile(t,
+		filepath.Join(root, "BUILD.lets"),
+		singleRepoWorkspace+"\n"+singleRepoBuild,
+	)
 	writeFile(t, filepath.Join(root, "hello/Dockerfile"), singleRepoDockerfile)
 	writeFile(t, filepath.Join(root, "payload.txt"), "single-repo says hi\n")
 
@@ -266,11 +183,12 @@ func TestE2E_singleRepoWithDep(t *testing.T) {
 
 	root := t.TempDir()
 
+	// Self-repo files at the repo root: the BUILD.lets begins with the repo
+	// block (workspace declaration) followed by the build rules.
 	writeFile(t,
-		filepath.Join(root, "WORKSPACE.lets"), singleRepoWithDepWorkspace,
+		filepath.Join(root, "BUILD.lets"),
+		singleRepoWithDepWorkspace+"\n"+e2eProj2Build,
 	)
-	// Self-repo files at the repo root.
-	writeFile(t, filepath.Join(root, "BUILD.lets"), e2eProj2Build)
 	writeFile(t, filepath.Join(root, "app/Dockerfile"), e2eAppDockerfile)
 	writeFile(t, filepath.Join(root, "payload.txt"), "hello from lets\n")
 	// Dependency pre-checked-out under _/src.
@@ -325,10 +243,7 @@ func TestE2E_singleRepoWithDep(t *testing.T) {
 
 const singleRepoWithDepWorkspace = `repo {
     Name: "test.local/proj2/dockers",
-}
-
-repo_map {
-    Src: {
+    Deps: {
         "test.local/proj1/dockers": "",
     },
 }

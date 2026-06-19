@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-// singleRepoEnvWithDep builds an env shaped like single-repo mode for the
-// self repo "shanhu.io/bld" with one external dependency declared in the
-// workspace repo_map. It mirrors what ReadWorkspace + setupSingleRepo
-// produce, without touching the filesystem.
+// singleRepoEnvWithDep builds an env for the self repo "shanhu.io/bld"
+// with one external dependency declared in the workspace repo's Deps. It
+// mirrors what ReadWorkspace + setupSingleRepo produce, without touching
+// the filesystem.
 func singleRepoEnvWithDep(root, self, dep string) *env {
 	return &env{
 		rootDir:  root,
@@ -16,8 +16,9 @@ func singleRepoEnvWithDep(root, self, dep string) *env {
 		outDir:   filepath.Join(root, "_", "out"),
 		repoName: self,
 		workspace: &Workspace{
-			RepoMap: &RepoMap{
-				Src: map[string]string{dep: ""},
+			Repo: &Repo{
+				Name: self,
+				Deps: map[string]string{dep: ""},
 			},
 		},
 	}
