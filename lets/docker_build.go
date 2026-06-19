@@ -237,6 +237,7 @@ func (b *dockerBuild) build(env *env, opts *buildOpts) error {
 	if err := docker.BuildImageConfig(env.dock, rt, config); err != nil {
 		return err
 	}
+	log.Printf("Built image: %s", rt)
 
 	info, err := docker.InspectImage(env.dock, rt)
 	if err != nil {
