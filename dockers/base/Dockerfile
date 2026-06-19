@@ -1,5 +1,6 @@
 FROM cr.shanhu.io/bld/alpine
 LABEL author="Shanhu Tech Inc."
+
 RUN <<EOF
 #!/bin/sh
 

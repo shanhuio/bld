@@ -3,6 +3,7 @@ LABEL author="Shanhu Tech Inc."
 
 RUN mkdir /usr/local/idle
 COPY idle.go /usr/local/idle/idle.go
+
 RUN <<EOF
 #!/bin/sh
 

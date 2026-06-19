@@ -11,4 +11,5 @@ mkdir -p /opt/app
 cd /opt/app/ && mkdir bin var etc lib tmp
 chown -R app /opt/app
 EOF
+
 WORKDIR /opt/app

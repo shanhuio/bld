@@ -15,6 +15,7 @@ npm install -g typescript less
 [[ "$(uname -m)" != aarch64 ]] || npm install -g esbuild-linux-arm64
 mkdir /usr/local/idle
 EOF
+
 COPY idle.js /usr/local/idle/idle.js
 
 COPY ssh_known_hosts /etc/ssh/known_hosts
@@ -28,6 +29,7 @@ adduser -D -u 3000 node
 mkdir -p /opt/node
 chown -R node /opt/node
 EOF
+
 WORKDIR /opt/node
 USER node
 
