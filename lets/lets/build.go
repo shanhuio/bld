@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"shanhu.io/bld/lets"
 	"shanhu.io/std/lexing"
@@ -15,16 +14,9 @@ func cmdBuild(args []string) error {
 	declareBuildFlags(flags, config)
 	args = parseArgs(flags, args)
 
-	wd, err := os.Getwd()
+	wd, err := resolveWorkDir(config)
 	if err != nil {
-		return fmt.Errorf("get work dir: %w", err)
-	}
-	if config.Root != "" {
-		root, err := filepath.Abs(config.Root)
-		if err != nil {
-			return fmt.Errorf("get abs root dir: %w", err)
-		}
-		config.Root = root
+		return err
 	}
 
 	b, err := lets.NewBuilder(wd, config)

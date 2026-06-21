@@ -19,9 +19,9 @@ func cmdSync(args []string) error {
 	setRemotes := flags.Bool("set_remotes", false, "sets remote URLs")
 	args = parseArgs(flags, args)
 
-	wd, err := os.Getwd()
+	wd, err := resolveWorkDir(config)
 	if err != nil {
-		return fmt.Errorf("get work dir: %w", err)
+		return err
 	}
 
 	b, err := lets.NewBuilder(wd, config)
