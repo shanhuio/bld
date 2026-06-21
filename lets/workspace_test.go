@@ -167,3 +167,41 @@ func TestFindRoot_gitDir(t *testing.T) {
 		t.Errorf("findRoot(%q) = %q, want %q", sub, got, root)
 	}
 }
+
+func TestSaveRepoSums_empty_removesExistingFile(t *testing.T) {
+	f := filepath.Join(t.TempDir(), "sums.jsonx")
+	if err := os.WriteFile(f, []byte("{ RepoCommits: {} }\n"), 0644); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	if err := SaveRepoSums(f, &RepoSums{RepoCommits: map[string]string{}}); err != nil {
+		t.Fatalf("SaveRepoSums: %v", err)
+	}
+	if ok, _ := isRegularFile(f); ok {
+		t.Error("sums file still exists after saving empty sums")
+	}
+}
+
+func TestSaveRepoSums_empty_writesNoFile(t *testing.T) {
+	f := filepath.Join(t.TempDir(), "sums.jsonx")
+	if err := SaveRepoSums(f, &RepoSums{}); err != nil {
+		t.Fatalf("SaveRepoSums: %v", err)
+	}
+	if ok, _ := isRegularFile(f); ok {
+		t.Error("sums file created for empty sums")
+	}
+}
+
+func TestSaveRepoSums_nonEmpty_writes(t *testing.T) {
+	f := filepath.Join(t.TempDir(), "sums.jsonx")
+	want := &RepoSums{RepoCommits: map[string]string{"a/b": "deadbeef"}}
+	if err := SaveRepoSums(f, want); err != nil {
+		t.Fatalf("SaveRepoSums: %v", err)
+	}
+	got, err := ReadRepoSums(f)
+	if err != nil {
+		t.Fatalf("ReadRepoSums: %v", err)
+	}
+	if got.RepoCommits["a/b"] != "deadbeef" {
+		t.Errorf("RepoCommits = %+v, want a/b=deadbeef", got.RepoCommits)
+	}
+}

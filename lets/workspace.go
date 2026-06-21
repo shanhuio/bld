@@ -2,6 +2,7 @@ package lets
 
 import (
 	"errors"
+	"os"
 
 	"shanhu.io/std/jsonx"
 	"shanhu.io/std/lexing"
@@ -83,7 +84,15 @@ func ReadRepoSums(f string) (*RepoSums, error) {
 	return b, nil
 }
 
-// SaveRepoSums saves sums to f.
+// SaveRepoSums saves sums to f. When there are no recorded commits, it
+// writes nothing and removes any existing sums file, so a workspace without
+// dependencies does not carry an empty sums file.
 func SaveRepoSums(f string, sums *RepoSums) error {
+	if sums == nil || len(sums.RepoCommits) == 0 {
+		if err := os.Remove(f); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+		return nil
+	}
 	return jsonx.WriteFile(f, sums)
 }
