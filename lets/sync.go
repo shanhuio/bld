@@ -113,9 +113,11 @@ func gitSync(name, dir, remote, commit string) (*syncResult, error) {
 		}
 	}
 
-	// fetch to the stash branch and then merge.
+	// Shallow-fetch just the target commit and hard-reset to it. Dependency
+	// checkouts are read-only, so we don't need history or a merge; the
+	// minimal depth keeps each checkout as small as possible.
 	if err := runCmd(
-		dir, "git", "fetch", "-q", remote, "HEAD",
+		dir, "git", "fetch", "-q", "--depth", "1", remote, commit,
 	); err != nil {
 		return nil, fmt.Errorf("git fetch: %w", err)
 	}
@@ -125,9 +127,9 @@ func gitSync(name, dir, remote, commit string) (*syncResult, error) {
 		return nil, fmt.Errorf("git branch stash: %w", err)
 	}
 	if err := runCmd(
-		dir, "git", "merge", "-q", stashBranch,
+		dir, "git", "reset", "-q", "--hard", commit,
 	); err != nil {
-		return nil, fmt.Errorf("git merge stash: %w", err)
+		return nil, fmt.Errorf("git reset: %w", err)
 	}
 
 	return &syncResult{
