@@ -16,7 +16,6 @@ func cmdSync(args []string) error {
 	declareBuildFlags(flags, config)
 	pull := flags.Bool("pull", false, "pull latest commit")
 	save := flags.Bool("save", false, "save latest commit into sums file")
-	setRemotes := flags.Bool("set_remotes", false, "sets remote URLs")
 	args = parseArgs(flags, args)
 
 	wd, err := resolveWorkDir(config)
@@ -33,6 +32,7 @@ func cmdSync(args []string) error {
 		lexing.FprintErrs(os.Stderr, errs, wd)
 		return fmt.Errorf("read workspace got %d errors", len(errs))
 	}
+
 	var sums *lets.RepoSums
 	if !*pull {
 		s, err := lets.ReadRepoSums(sumsFile)
@@ -42,11 +42,7 @@ func cmdSync(args []string) error {
 		sums = s
 	}
 
-	opts := &lets.SyncOptions{
-		SetRemotes: *setRemotes,
-	}
-
-	newSums, err := b.SyncRepos(sums, opts)
+	newSums, err := b.SyncRepos(sums)
 	if err != nil {
 		return err
 	}

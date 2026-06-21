@@ -143,10 +143,8 @@ func (b *Builder) Out(f string) string { return b.env.out(f) }
 
 // SyncRepos synchronizes the repositories. When sums is nil, it pulls
 // from the latest HEAD.
-func (b *Builder) SyncRepos(sums *RepoSums, opts *SyncOptions) (
-	*RepoSums, error,
-) {
-	return syncRepos(b.env, sums, opts)
+func (b *Builder) SyncRepos(sums *RepoSums) (*RepoSums, error) {
+	return syncRepos(b.env, sums)
 }
 
 // Build builds the given rules.

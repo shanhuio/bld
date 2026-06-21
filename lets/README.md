@@ -157,7 +157,6 @@ Common `build` flags:
 
 - `-pull` — sync to the latest remote `HEAD` instead of the pinned commits.
 - `-save` — write the resolved commits to `sums.jsonx`.
-- `-set_remotes` — add/update git remotes for checked-out repos.
 
 `sync` pins each repo to a commit recorded in `sums.jsonx`; without `-pull` it
 reproduces exactly those commits, fetching and fast-forwarding via an internal

@@ -73,7 +73,7 @@ func TestSyncRepos_skipsSelf(t *testing.T) {
 		t.FailNow()
 	}
 
-	sums, err := b.SyncRepos(nil, &SyncOptions{})
+	sums, err := b.SyncRepos(nil)
 	if err != nil {
 		t.Fatalf("SyncRepos: %v", err)
 	}
@@ -128,7 +128,7 @@ func TestSyncRepos_noDeps(t *testing.T) {
 		t.FailNow()
 	}
 
-	sums, err := b.SyncRepos(nil, &SyncOptions{})
+	sums, err := b.SyncRepos(nil)
 	if err != nil {
 		t.Fatalf("SyncRepos: %v", err)
 	}
