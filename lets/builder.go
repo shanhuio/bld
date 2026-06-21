@@ -77,6 +77,13 @@ func NewBuilder(workDir string, config *Config) (*Builder, error) {
 		root = dir
 	}
 
+	// The work dir must live inside the root (the root itself, or any
+	// subdirectory, including dependency checkouts under _/src). This can
+	// only fail when the root is given explicitly via Config.Root.
+	if _, ok := pathUnder(root, workDir); !ok {
+		return nil, fmt.Errorf("work dir %q is not under root %q", workDir, root)
+	}
+
 	// srcDir, outDir and workSrcPath are filled in by setupSingleRepo once
 	// ReadWorkspace has read the self repo's name from the workspace.
 	env := &env{
