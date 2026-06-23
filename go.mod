@@ -6,8 +6,8 @@ toolchain go1.26.4
 
 require (
 	golang.org/x/tools v0.46.0
-	modernc.org/sqlite v1.52.0
-	shanhu.io/std v0.0.0-20260612232620-c5a277ad5225
+	modernc.org/sqlite v1.53.0
+	shanhu.io/std v0.0.0-20260623070910-a946ba6fee46
 )
 
 require (
