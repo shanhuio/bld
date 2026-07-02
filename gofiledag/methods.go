@@ -6,6 +6,7 @@ import (
 	"go/token"
 	"go/types"
 	"path/filepath"
+	"strings"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -91,14 +92,15 @@ func exprString(e ast.Expr) string {
 	case *ast.IndexExpr:
 		return exprString(v.X) + "[" + exprString(v.Index) + "]"
 	case *ast.IndexListExpr:
-		s := exprString(v.X) + "["
+		var s strings.Builder
+		s.WriteString(exprString(v.X) + "[")
 		for i, ix := range v.Indices {
 			if i > 0 {
-				s += ", "
+				s.WriteString(", ")
 			}
-			s += exprString(ix)
+			s.WriteString(exprString(ix))
 		}
-		return s + "]"
+		return s.String() + "]"
 	default:
 		return "?"
 	}

@@ -3,6 +3,7 @@ package lets
 import (
 	"fmt"
 	"log"
+	"slices"
 	"strings"
 
 	"shanhu.io/std/docker"
@@ -80,13 +81,7 @@ func (p *imagePull) pull(env *env) (*imageSum, error) {
 	}
 	if digest != "" {
 		digestWant := digestPrefix + digest
-		found := false
-		for _, digest := range repoDigests {
-			if digest == digestWant {
-				found = true
-				break
-			}
-		}
+		found := slices.Contains(repoDigests, digestWant)
 		if !found {
 			return nil, fmt.Errorf(
 				"digest mismatch, got %q, want %q",
@@ -138,9 +133,9 @@ func (p *imagePull) meta(env *env) (*buildRuleMeta, error) {
 	}
 
 	return &buildRuleMeta{
-		name:      p.name,
-		outs:      outs,
+		name:     p.name,
+		outs:     outs,
 		imageOut: true,
-		digest:    digest,
+		digest:   digest,
 	}, nil
 }
