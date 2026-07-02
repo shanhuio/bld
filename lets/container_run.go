@@ -69,7 +69,7 @@ func newContainerRun(_ *env, p string, r *ContainerRun) *containerRun {
 		deps:    deps,
 		outs:    outs,
 		outMap:  outMap,
-		envs:    makeDockerVars(r.Envs, nil),
+		envs:    makeEnvVars(r.Envs, nil),
 	}
 }
 

@@ -55,7 +55,7 @@ func TestMakeDockerVars(t *testing.T) {
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {
-			got := makeDockerVars(c.envs, lookup(c.environ))
+			got := makeEnvVars(c.envs, lookup(c.environ))
 			if !reflect.DeepEqual(got, c.want) {
 				t.Errorf("got %v, want %v", got, c.want)
 			}
@@ -65,7 +65,7 @@ func TestMakeDockerVars(t *testing.T) {
 
 func TestMakeDockerVars_nilLookupUsesOSEnv(t *testing.T) {
 	t.Setenv("LETS_TEST_VAR", "hello")
-	got := makeDockerVars([]string{"LETS_TEST_VAR"}, nil)
+	got := makeEnvVars([]string{"LETS_TEST_VAR"}, nil)
 	want := map[string]string{"LETS_TEST_VAR": "hello"}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %v, want %v", got, want)

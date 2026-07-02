@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func makeDockerVars(
+func makeEnvVars(
 	envs []string, lookupEnv func(string) (string, bool),
 ) map[string]string {
 	if lookupEnv == nil {
