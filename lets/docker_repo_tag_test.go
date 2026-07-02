@@ -4,9 +4,9 @@ import "testing"
 
 func TestParseRepoTag(t *testing.T) {
 	for _, c := range []struct {
-		in          string
-		wantRepo    string
-		wantTag     string
+		in       string
+		wantRepo string
+		wantTag  string
 	}{
 		{"alpine", "alpine", "latest"},
 		{"alpine:3.23", "alpine", "3.23"},
@@ -73,7 +73,7 @@ func TestNameToRepoTag(t *testing.T) {
 		{name: "a", wantErr: true},
 		{name: "a/b/c", wantErr: true},
 		{name: "a/b/c/d/e", wantErr: true},
-		{name: "a/b/other/d", wantErr: true},   // third component not dockers
+		{name: "a/b/other/d", wantErr: true},    // third component not dockers
 		{name: "a/b/dockers2/d", wantErr: true}, // third component looks similar but doesn't match
 	} {
 		t.Run(c.name, func(t *testing.T) {

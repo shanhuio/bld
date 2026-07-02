@@ -37,7 +37,7 @@ func sampleBuilt() *built {
 			ModTimestamp: 1000,
 			Mode:         0644,
 		}},
-		Dockers: []*imageSum{{
+		Images: []*imageSum{{
 			Repo: "repo", Tag: "tag", ID: "abc123",
 		}},
 	}

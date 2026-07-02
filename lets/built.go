@@ -8,8 +8,8 @@ import (
 )
 
 type built struct {
-	Outs    []*fileStat  `json:",omitempty"` // A list of outputs.
-	Dockers []*imageSum `json:",omitempty"` // A contaienr image.
+	Outs   []*fileStat `json:",omitempty"` // A list of outputs.
+	Images []*imageSum `json:",omitempty"` // Container images.
 }
 
 func newBuilt(env *env, meta *buildRuleMeta) (*built, error) {
@@ -20,7 +20,7 @@ func newBuilt(env *env, meta *buildRuleMeta) (*built, error) {
 			if err != nil {
 				return nil, fmt.Errorf("read docker sum: %s: %w", out, err)
 			}
-			b.Dockers = append(b.Dockers, sum)
+			b.Images = append(b.Images, sum)
 		}
 		stat, err := newOutFileStat(env, out)
 		if err != nil {
@@ -44,7 +44,7 @@ func checkSameBuilt(env *env, b *built) (bool, error) {
 		}
 	}
 
-	for _, d := range b.Dockers {
+	for _, d := range b.Images {
 		repoTag := repoTag(d.Repo, d.Tag)
 		info, err := docker.InspectImage(env.dock, repoTag)
 		if err != nil {

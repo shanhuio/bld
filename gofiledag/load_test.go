@@ -14,13 +14,13 @@ func TestClassifyPackage(t *testing.T) {
 		wantKind PassKind
 	}{
 		{
-			name: "production",
-			pkg:  &packages.Package{ID: "foo", Name: "foo", PkgPath: "foo"},
+			name:     "production",
+			pkg:      &packages.Package{ID: "foo", Name: "foo", PkgPath: "foo"},
 			wantKind: PassProd,
 		},
 		{
-			name: "internal test variant",
-			pkg:  &packages.Package{ID: "foo [foo.test]", Name: "foo", PkgPath: "foo"},
+			name:     "internal test variant",
+			pkg:      &packages.Package{ID: "foo [foo.test]", Name: "foo", PkgPath: "foo"},
 			wantKind: PassInternalTest,
 		},
 		{
