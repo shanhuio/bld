@@ -15,7 +15,7 @@ func newImageSum(repo, tag, id string) *imageSum {
 	}
 }
 
-func imageSumOut(name string) string { return name + ".dockersum" }
+func imageSumOut(name string) string { return name + ".imgsum" }
 
 func imageTarOut(name string) string { return name + ".tar.gz" }
 
