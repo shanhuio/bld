@@ -29,7 +29,7 @@ func newDockerRun(_ *env, p string, r *DockerRun) *dockerRun {
 
 	image := makePath(p, r.Image)
 	var deps []string
-	deps = append(deps, dockerSumOut(image))
+	deps = append(deps, imageSumOut(image))
 
 	depsMap := make(map[string]bool)
 	for _, d := range r.Deps {

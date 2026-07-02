@@ -8,33 +8,33 @@ import (
 	"shanhu.io/std/docker"
 )
 
-type dockerPull struct {
+type imagePull struct {
 	name    string
-	rule    *DockerPull
+	rule    *ImagePull
 	repoTag string
 	out     string
 	tarOut  string
 }
 
-func newDockerPull(env *env, p string, r *DockerPull) (*dockerPull, error) {
+func newImagePull(env *env, p string, r *ImagePull) (*imagePull, error) {
 	name := makeRelPath(p, r.Name)
 	repoTag, err := nameToRepoTag(name)
 	if err != nil {
 		return nil, fmt.Errorf("invalid docker pull name: %w", err)
 	}
-	pull := &dockerPull{
+	pull := &imagePull{
 		name:    name,
 		rule:    r,
 		repoTag: repoTag,
-		out:     dockerSumOut(name),
+		out:     imageSumOut(name),
 	}
 	if r.OutputTar {
-		pull.tarOut = dockerTarOut(name)
+		pull.tarOut = imageTarOut(name)
 	}
 	return pull, nil
 }
 
-func (p *dockerPull) pull(env *env) (*dockerSum, error) {
+func (p *imagePull) pull(env *env) (*imageSum, error) {
 	r := p.rule
 
 	repo, tag := parseRepoTag(p.repoTag)
@@ -95,12 +95,12 @@ func (p *dockerPull) pull(env *env) (*dockerSum, error) {
 		}
 	}
 
-	sum := newDockerSum(repo, tag, info.ID)
+	sum := newImageSum(repo, tag, info.ID)
 	sum.Origin = from
 	return sum, nil
 }
 
-func (p *dockerPull) build(env *env, opts *buildOpts) error {
+func (p *imagePull) build(env *env, opts *buildOpts) error {
 	sum, err := p.pull(env)
 	if err != nil {
 		return err
@@ -126,7 +126,7 @@ func (p *dockerPull) build(env *env, opts *buildOpts) error {
 	return nil
 }
 
-func (p *dockerPull) meta(env *env) (*buildRuleMeta, error) {
+func (p *imagePull) meta(env *env) (*buildRuleMeta, error) {
 	digest, err := makeDigest(ruleDockerPull, p.name, p.rule)
 	if err != nil {
 		return nil, fmt.Errorf("digest: %w", err)

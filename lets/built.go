@@ -9,14 +9,14 @@ import (
 
 type built struct {
 	Outs    []*fileStat  `json:",omitempty"` // A list of outputs.
-	Dockers []*dockerSum `json:",omitempty"` // A contaienr image.
+	Dockers []*imageSum `json:",omitempty"` // A contaienr image.
 }
 
 func newBuilt(env *env, meta *buildRuleMeta) (*built, error) {
 	b := new(built)
 	for i, out := range meta.outs {
 		if i == 0 && meta.dockerOut {
-			sum, err := loadDockerSum(env.out(out))
+			sum, err := loadImageSum(env.out(out))
 			if err != nil {
 				return nil, fmt.Errorf("read docker sum: %s: %w", out, err)
 			}

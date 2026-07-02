@@ -12,9 +12,9 @@ import (
 	"shanhu.io/std/tarutil"
 )
 
-type dockerBuild struct {
+type imageBuild struct {
 	name           string
-	rule           *DockerBuild
+	rule           *ImageBuild
 	fromRuleSums   []string
 	dockerfilePath string
 	inputs         []string
@@ -26,8 +26,8 @@ type dockerBuild struct {
 	tarOut         string
 }
 
-func newDockerBuild(env *env, p string, r *DockerBuild) (
-	*dockerBuild, error,
+func newImageBuild(env *env, p string, r *ImageBuild) (
+	*imageBuild, error,
 ) {
 	name := makeRelPath(p, r.Name)
 
@@ -42,7 +42,7 @@ func newDockerBuild(env *env, p string, r *DockerBuild) (
 	if len(r.From) > 0 {
 		for _, from := range r.From {
 			rp := makePath(p, from)
-			fromRuleSums = append(fromRuleSums, dockerSumOut(rp))
+			fromRuleSums = append(fromRuleSums, imageSumOut(rp))
 		}
 	}
 
@@ -69,10 +69,10 @@ func newDockerBuild(env *env, p string, r *DockerBuild) (
 
 	var tarOut string
 	if r.OutputTar {
-		tarOut = dockerTarOut(name)
+		tarOut = imageTarOut(name)
 	}
 
-	return &dockerBuild{
+	return &imageBuild{
 		name:           name,
 		rule:           r,
 		dockerfilePath: f,
@@ -82,12 +82,12 @@ func newDockerBuild(env *env, p string, r *DockerBuild) (
 		prefixDir:      prefixDir,
 		repoTag:        repoTag,
 		args:           args,
-		out:            dockerSumOut(name),
+		out:            imageSumOut(name),
 		tarOut:         tarOut,
 	}, nil
 }
 
-func (b *dockerBuild) meta(env *env) (*buildRuleMeta, error) {
+func (b *imageBuild) meta(env *env) (*buildRuleMeta, error) {
 	dat := struct {
 		Dockerfile string            // Know which one is the Dockerfile
 		Args       map[string]string `json:",omitempty"`
@@ -124,7 +124,7 @@ func (b *dockerBuild) meta(env *env) (*buildRuleMeta, error) {
 	}, nil
 }
 
-func (b *dockerBuild) build(env *env, opts *buildOpts) error {
+func (b *imageBuild) build(env *env, opts *buildOpts) error {
 	dockerfileBytes, err := os.ReadFile(env.src(b.dockerfilePath))
 	if err != nil {
 		return fmt.Errorf("read Dockerfile: %w", err)
@@ -244,7 +244,7 @@ func (b *dockerBuild) build(env *env, opts *buildOpts) error {
 		return fmt.Errorf("inspect built image: %w", err)
 	}
 
-	sum := newDockerSum(repo, tag, info.ID)
+	sum := newImageSum(repo, tag, info.ID)
 
 	out, err := env.prepareOut(b.out)
 	if err != nil {

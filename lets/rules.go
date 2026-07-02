@@ -38,16 +38,16 @@ type Bundle struct {
 	Deps []string
 }
 
-// DockerPull is a rule to pull down a docker container image.
-type DockerPull struct {
+// ImagePull is a rule to pull down a docker container image.
+type ImagePull struct {
 	Name      string
 	Pull      string `json:",omitempty"`
 	Digest    string `json:",omitempty"`
 	OutputTar bool   `json:",omitempty"`
 }
 
-// DockerBuild is a rule to build a docker container image.
-type DockerBuild struct {
+// ImageBuild is a rule to build a docker container image.
+type ImageBuild struct {
 	Name         string
 	Dockerfile   string   `json:",omitempty"`
 	From         []string `json:",omitempty"`

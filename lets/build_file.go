@@ -18,9 +18,9 @@ func makeBuildFileNode(t string) any {
 	case ruleBundle:
 		return new(Bundle)
 	case ruleDockerPull:
-		return new(DockerPull)
+		return new(ImagePull)
 	case ruleDockerBuild:
-		return new(DockerBuild)
+		return new(ImageBuild)
 	case ruleDockerRun:
 		return new(DockerRun)
 	case ruleDownload:
@@ -78,15 +78,15 @@ func readBuildFile(env *env, p string) ([]*buildNode, []*lexing.Error) {
 				continue
 			}
 			node.rule = fset
-		case *DockerPull:
-			dp, err := newDockerPull(env, p, v)
+		case *ImagePull:
+			dp, err := newImagePull(env, p, v)
 			if err != nil {
 				errList.Add(&lexing.Error{Pos: r.Pos, Err: err})
 				continue
 			}
 			node.rule = dp
-		case *DockerBuild:
-			db, err := newDockerBuild(env, p, v)
+		case *ImageBuild:
+			db, err := newImageBuild(env, p, v)
 			if err != nil {
 				errList.Add(&lexing.Error{Pos: r.Pos, Err: err})
 				continue
