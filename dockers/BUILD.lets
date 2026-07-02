@@ -29,7 +29,7 @@ docker_build {
     ],
     PrefixDir: ".",
     // See https://www.npmjs.com/package/npm
-    Args: ["NPM_VERSION=11.17.0"],
+    Args: ["NPM_VERSION=11.18.0"],
 }
 
 download {
