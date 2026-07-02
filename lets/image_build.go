@@ -119,7 +119,7 @@ func (b *imageBuild) meta(env *env) (*buildRuleMeta, error) {
 		name:      b.name,
 		deps:      sortedStrList(makeStrSet(deps)),
 		outs:      outs,
-		dockerOut: true,
+		imageOut: true,
 		digest:    digest,
 	}, nil
 }

@@ -5,7 +5,7 @@ type buildRuleMeta struct {
 	deps []string
 	outs []string
 
-	dockerOut bool // Output is a docker container image.
+	imageOut bool // Output is a container image.
 
 	// digest captures all non-dependency input such as action type, binded
 	// input, external input, etc.  returns empty string if this always needs

@@ -140,7 +140,7 @@ func (p *imagePull) meta(env *env) (*buildRuleMeta, error) {
 	return &buildRuleMeta{
 		name:      p.name,
 		outs:      outs,
-		dockerOut: true,
+		imageOut: true,
 		digest:    digest,
 	}, nil
 }

@@ -19,7 +19,7 @@ func buildNodeDigest(
 			}
 			action.Rule = meta.digest
 			action.Outs = meta.outs
-			action.DockerOut = meta.dockerOut
+			action.ImageOut = meta.imageOut
 		}
 		d, err := makeDigest("build_action", "", action)
 		if err != nil {
