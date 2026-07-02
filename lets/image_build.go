@@ -116,11 +116,11 @@ func (b *imageBuild) meta(env *env) (*buildRuleMeta, error) {
 		outs = append(outs, b.tarOut)
 	}
 	return &buildRuleMeta{
-		name:      b.name,
-		deps:      sortedStrList(makeStrSet(deps)),
-		outs:      outs,
+		name:     b.name,
+		deps:     sortedStrList(makeStrSet(deps)),
+		outs:     outs,
 		imageOut: true,
-		digest:    digest,
+		digest:   digest,
 	}, nil
 }
 

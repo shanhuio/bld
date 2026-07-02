@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -245,6 +246,114 @@ const singleRepoWithDepWorkspace = `repo {
     Name: "test.local/proj2/dockers",
     Deps: {
         "test.local/proj1/dockers": "",
+    },
+}
+`
+
+func dockerRmVolume(name string) {
+	_ = exec.Command("docker", "volume", "rm", "-f", name).Run()
+}
+
+// TestE2E_containerRunCacheVolume exercises CacheVolumes: a container_run
+// mounts a host-global named volume, writes a marker into it, and the
+// marker persists into a second run from a fresh workspace (proving the
+// cache survives container teardown). A third run with AlwaysRebuild
+// clears the volume, so the marker is gone again.
+func TestE2E_containerRunCacheVolume(t *testing.T) {
+	requireDocker(t)
+
+	const (
+		imgTag  = "test.local/cachetest/alpine:latest"
+		volName = "lets-cache-e2e-cache-test"
+	)
+	dockerRmiTags(imgTag)
+	dockerRmVolume(volName)
+	t.Cleanup(func() {
+		dockerRmiTags(imgTag)
+		dockerRmVolume(volName)
+	})
+
+	// run builds the probe rule in a fresh workspace (so the rule's own
+	// output cache never lets it skip the run) and returns the marker
+	// state the container observed.
+	run := func(alwaysRebuild bool) string {
+		t.Helper()
+		root := t.TempDir()
+		writeFile(t,
+			filepath.Join(root, "BUILD.lets"),
+			cacheVolumeWorkspace+"\n"+cacheVolumeBuild,
+		)
+
+		b, err := NewBuilder(root, &Config{
+			Root: root, AlwaysRebuild: alwaysRebuild,
+		})
+		if err != nil {
+			t.Fatalf("NewBuilder: %v", err)
+		}
+		if _, errs := b.ReadWorkspace(); errs != nil {
+			for _, e := range errs {
+				t.Error(e)
+			}
+			t.FailNow()
+		}
+		if errs := b.Build([]string{"probe"}); errs != nil {
+			for _, e := range errs {
+				t.Error(e)
+			}
+			t.FailNow()
+		}
+		bs, err := os.ReadFile(filepath.Join(
+			root, "_/out/test.local/cachetest/dockers/result.txt",
+		))
+		if err != nil {
+			t.Fatalf("read probe output: %v", err)
+		}
+		return strings.TrimSpace(string(bs))
+	}
+
+	// First run sees a cold cache and writes the marker.
+	if got := run(false); got != "cold" {
+		t.Fatalf("run 1 = %q, want cold", got)
+	}
+	// Second run, fresh workspace: the global volume persists, so the
+	// marker written by run 1 is still there.
+	if got := run(false); got != "warm" {
+		t.Fatalf("run 2 = %q, want warm (cache did not persist)", got)
+	}
+	// The volume must survive container teardown.
+	if err := exec.Command(
+		"docker", "volume", "inspect", volName,
+	).Run(); err != nil {
+		t.Errorf("cache volume missing after runs: %v", err)
+	}
+	// Third run with -rebuild clears the volume, so the marker is gone.
+	if got := run(true); got != "cold" {
+		t.Fatalf("run 3 (rebuild) = %q, want cold (cache not cleared)", got)
+	}
+}
+
+const cacheVolumeWorkspace = `repo {
+    Name: "test.local/cachetest/dockers",
+}
+`
+
+const cacheVolumeBuild = `image_pull {
+    Name: "alpine",
+    Pull: "alpine:3.23",
+}
+
+container_run {
+    Name: "probe",
+    Image: "alpine",
+    Command: [
+        "sh", "-c",
+        "if [ -f /cache/marker ]; then echo warm > /result.txt; else echo cold > /result.txt; fi; echo x > /cache/marker",
+    ],
+    CacheVolumes: {
+        "/cache": "e2e-cache-test",
+    },
+    Output: {
+        "result.txt": "/result.txt",
     },
 }
 `

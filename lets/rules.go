@@ -70,6 +70,23 @@ type ContainerRun struct {
 	// build file read-only at this path inside the container.
 	MountDir string `json:",omitempty"`
 
+	// CacheVolumes mounts named, persistent, read-write volumes into the
+	// container to cache build artifacts across runs (e.g. the Go module
+	// and build cache). It maps an absolute mount path inside the
+	// container to a logical cache name; the same volume may be mounted
+	// at more than one path. For example, to persist the Go caches:
+	//
+	//	CacheVolumes: {
+	//	    "/root/go/pkg":   "go-pkg",   // module + build cache
+	//	    "/root/.cache/go-build": "go-build",
+	//	}
+	//
+	// The volumes are shared globally on the host and persist across
+	// builds. Their contents are NOT hermetic and never part of the
+	// rule's digest: a rule's outputs must be identical whether the
+	// cache is warm or cold. Building with -rebuild clears them.
+	CacheVolumes map[string]string `json:",omitempty"`
+
 	Command []string `json:",omitempty"`
 
 	// Map from input to file inside the container.

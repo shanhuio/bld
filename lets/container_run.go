@@ -4,12 +4,33 @@ import (
 	"fmt"
 	"log"
 	"path"
+	"regexp"
 	"sort"
 	"strings"
 
 	"shanhu.io/std/docker"
+	"shanhu.io/std/errcode"
 	"shanhu.io/std/tarutil"
 )
+
+// cacheVolumePrefix namespaces the host-global volume names lets creates
+// for cache mounts, so they are recognizable and never clash with
+// user-managed volumes.
+const cacheVolumePrefix = "lets-cache-"
+
+// cacheVolumeLabel tags every cache volume lets creates, so they can be
+// enumerated (e.g. for future pruning) without guessing by name.
+const cacheVolumeLabel = "io.shanhu.lets.cache"
+
+// cacheNameRe restricts logical cache names to characters that make a
+// valid Docker volume name once prefixed.
+var cacheNameRe = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_.-]*$`)
+
+// cacheVol is a resolved cache-volume mount for a containerRun.
+type cacheVol struct {
+	name string // backend volume name (cacheVolumePrefix + logical name).
+	cont string // absolute mount path inside the container.
+}
 
 type containerRun struct {
 	name    string
@@ -22,9 +43,10 @@ type containerRun struct {
 	outs    []string
 	outMap  map[string]string
 	envs    map[string]string
+	caches  []*cacheVol
 }
 
-func newContainerRun(_ *env, p string, r *ContainerRun) *containerRun {
+func newContainerRun(_ *env, p string, r *ContainerRun) (*containerRun, error) {
 	name := makeRelPath(p, r.Name)
 
 	image := makePath(p, r.Image)
@@ -59,6 +81,11 @@ func newContainerRun(_ *env, p string, r *ContainerRun) *containerRun {
 	}
 	outs = sortedStrList(makeStrSet(outs))
 
+	caches, err := makeCacheVols(r.CacheVolumes)
+	if err != nil {
+		return nil, err
+	}
+
 	return &containerRun{
 		name:    name,
 		path:    p,
@@ -70,7 +97,40 @@ func newContainerRun(_ *env, p string, r *ContainerRun) *containerRun {
 		outs:    outs,
 		outMap:  outMap,
 		envs:    makeEnvVars(r.Envs, nil),
+		caches:  caches,
+	}, nil
+}
+
+// makeCacheVols resolves and validates the CacheVolumes map into a slice
+// of cache mounts sorted by mount path. Each key is an absolute, clean
+// (see path.Clean) mount path inside the container; each value is a
+// logical cache name. The same volume may be mounted at multiple paths.
+func makeCacheVols(cacheVolumes map[string]string) ([]*cacheVol, error) {
+	if len(cacheVolumes) == 0 {
+		return nil, nil
 	}
+
+	conts := make([]string, 0, len(cacheVolumes))
+	for cont := range cacheVolumes {
+		conts = append(conts, cont)
+	}
+	sort.Strings(conts)
+
+	var vols []*cacheVol
+	for _, cont := range conts {
+		if !path.IsAbs(cont) {
+			return nil, fmt.Errorf("cache volume path %q must be absolute", cont)
+		}
+		if cont != path.Clean(cont) {
+			return nil, fmt.Errorf("cache volume path %q is not clean", cont)
+		}
+		name := cacheVolumes[cont]
+		if !cacheNameRe.MatchString(name) {
+			return nil, fmt.Errorf("invalid cache volume name %q", name)
+		}
+		vols = append(vols, &cacheVol{name: cacheVolumePrefix + name, cont: cont})
+	}
+	return vols, nil
 }
 
 func (r *containerRun) meta(env *env) (*buildRuleMeta, error) {
@@ -109,12 +169,34 @@ func (r *containerRun) build(env *env, opts *buildOpts) error {
 		})
 	}
 
+	c := env.dock
+
+	for _, vol := range r.caches {
+		// -rebuild clears the cache so the run starts from a cold cache.
+		// The volume is host-global, so this affects every rule sharing it.
+		if opts.alwaysRebuild {
+			if err := docker.RemoveVolume(c, vol.name); err != nil {
+				if !errcode.IsNotFound(err) {
+					return fmt.Errorf("clear cache volume %q: %w", vol.name, err)
+				}
+			}
+		}
+		if _, err := docker.CreateVolumeIfNotExist(c, vol.name, &docker.VolumeConfig{
+			Labels: map[string]string{cacheVolumeLabel: "1"},
+		}); err != nil {
+			return fmt.Errorf("create cache volume %q: %w", vol.name, err)
+		}
+		contConfig.Mounts = append(contConfig.Mounts, &docker.ContMount{
+			Host: vol.name,
+			Cont: vol.cont,
+			Type: docker.MountVolume,
+		})
+	}
+
 	img, err := nameToRepoTag(r.image)
 	if err != nil {
 		return fmt.Errorf("map image name: %w", err)
 	}
-
-	c := env.dock
 
 	cont, err := docker.CreateCont(c, img, contConfig)
 	if err != nil {

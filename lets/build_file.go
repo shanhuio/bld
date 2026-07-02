@@ -93,7 +93,12 @@ func readBuildFile(env *env, p string) ([]*buildNode, []*lexing.Error) {
 			}
 			node.rule = db
 		case *ContainerRun:
-			node.rule = newContainerRun(env, p, v)
+			cr, err := newContainerRun(env, p, v)
+			if err != nil {
+				errList.Add(&lexing.Error{Pos: r.Pos, Err: err})
+				continue
+			}
+			node.rule = cr
 		case *Download:
 			d, err := newDownload(env, p, v)
 			if err != nil {

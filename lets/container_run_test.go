@@ -38,12 +38,15 @@ func TestContainerRunMountDir_dependency(t *testing.T) {
 
 	// A container_run defined in the dependency's dockers/ subdirectory.
 	dir := dep + "/dockers"
-	r := newContainerRun(e, dir, &ContainerRun{
+	r, err := newContainerRun(e, dir, &ContainerRun{
 		Name:     "smoke",
 		Image:    "app",
 		MountDir: "/dir",
 		Command:  []string{"true"},
 	})
+	if err != nil {
+		t.Fatalf("newContainerRun: %v", err)
+	}
 
 	if r.path != dir {
 		t.Fatalf("containerRun.path = %q, want %q", r.path, dir)
@@ -71,15 +74,100 @@ func TestContainerRunMountDir_selfRepo(t *testing.T) {
 	e := singleRepoEnvWithDep(root, self, dep)
 
 	dir := self + "/dockers"
-	r := newContainerRun(e, dir, &ContainerRun{
+	r, err := newContainerRun(e, dir, &ContainerRun{
 		Name:     "smoke",
 		Image:    "app",
 		MountDir: "/dir",
 	})
+	if err != nil {
+		t.Fatalf("newContainerRun: %v", err)
+	}
 
 	got := e.src(r.path)
 	want := filepath.Join(root, "dockers")
 	if got != want {
 		t.Errorf("mount dir = %q, want self-repo build dir %q", got, want)
+	}
+}
+
+func TestMakeCacheVols_sortedAndPrefixed(t *testing.T) {
+	vols, err := makeCacheVols(map[string]string{
+		"/root/go/pkg":   "go-pkg",
+		"/var/cache/apk": "apk-cache",
+	})
+	if err != nil {
+		t.Fatalf("makeCacheVols: %v", err)
+	}
+	want := []*cacheVol{
+		{name: "lets-cache-go-pkg", cont: "/root/go/pkg"},
+		{name: "lets-cache-apk-cache", cont: "/var/cache/apk"},
+	}
+	if len(vols) != len(want) {
+		t.Fatalf("got %d volumes, want %d: %+v", len(vols), len(want), vols)
+	}
+	for i, w := range want {
+		if *vols[i] != *w {
+			t.Errorf("vols[%d] = %+v, want %+v", i, vols[i], w)
+		}
+	}
+}
+
+// TestMakeCacheVols_sameVolumeMultiplePaths checks that one logical cache
+// name may back mounts at more than one container path.
+func TestMakeCacheVols_sameVolumeMultiplePaths(t *testing.T) {
+	vols, err := makeCacheVols(map[string]string{
+		"/a": "shared",
+		"/b": "shared",
+	})
+	if err != nil {
+		t.Fatalf("makeCacheVols: %v", err)
+	}
+	want := []*cacheVol{
+		{name: "lets-cache-shared", cont: "/a"},
+		{name: "lets-cache-shared", cont: "/b"},
+	}
+	if len(vols) != len(want) {
+		t.Fatalf("got %d volumes, want %d: %+v", len(vols), len(want), vols)
+	}
+	for i, w := range want {
+		if *vols[i] != *w {
+			t.Errorf("vols[%d] = %+v, want %+v", i, vols[i], w)
+		}
+	}
+}
+
+func TestMakeCacheVols_empty(t *testing.T) {
+	vols, err := makeCacheVols(nil)
+	if err != nil {
+		t.Fatalf("makeCacheVols: %v", err)
+	}
+	if vols != nil {
+		t.Errorf("vols = %+v, want nil", vols)
+	}
+}
+
+func TestMakeCacheVols_errors(t *testing.T) {
+	for _, c := range []struct {
+		name string
+		vols map[string]string
+	}{
+		{
+			name: "relative path",
+			vols: map[string]string{"relative/path": "c"},
+		},
+		{
+			name: "unclean path",
+			vols: map[string]string{"/root/go/../go/pkg/": "c"},
+		},
+		{
+			name: "invalid volume name",
+			vols: map[string]string{"/cache": "bad/name"},
+		},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			if _, err := makeCacheVols(c.vols); err == nil {
+				t.Fatalf("makeCacheVols: want error, got nil")
+			}
+		})
 	}
 }

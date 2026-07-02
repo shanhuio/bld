@@ -112,6 +112,13 @@ type runRequest struct {
 	// before start.
 	Mounts []containerMount
 
+	// Caches are named, persistent, read-write volumes mounted for
+	// caching across runs. They are not hermetic: their contents never
+	// affect a rule's outputs or digest. When ClearCaches is set, each
+	// is emptied before the run.
+	Caches      []containerCache
+	ClearCaches bool
+
 	// Inputs are regular files copied into the container before
 	// start.
 	Inputs []containerInput
@@ -131,6 +138,13 @@ type runRequest struct {
 type containerMount struct {
 	Host string
 	Cont string
+}
+
+// containerCache is a named, persistent read-write volume mounted for
+// caching across runs.
+type containerCache struct {
+	Name string // backend volume name.
+	Cont string // absolute mount path inside the container.
 }
 
 // containerInput is a regular file copied into the container.

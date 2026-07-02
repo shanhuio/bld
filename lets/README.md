@@ -129,13 +129,42 @@ The `-rebuild` flag forces everything to rebuild.
 | `bundle`       | Group other rules under one name; no action of its own.                 |
 | `image_pull`   | Pull an image from a registry and tag it locally. Optionally pins a `Digest` and verifies it; optionally saves a `.tar` output. |
 | `image_build`  | Build an image from a `Dockerfile` plus a build context assembled from `Input` files, `ArchiveInput` zips, and `From` base-image rules. |
-| `container_run`| Run a one-shot container against an image. Copies `Input`/`ArchiveInput` in, runs `Command`, copies `Output` files back out; supports `Env`, `WorkDir`, and a read-only `MountDir` (the rule's own build-file directory). |
+| `container_run`| Run a one-shot container against an image. Copies `Input`/`ArchiveInput` in, runs `Command`, copies `Output` files back out; supports `Env`, `WorkDir`, a read-only `MountDir` (the rule's own build-file directory), and `CacheVolumes` (see below). |
 | `download`     | Download a URL to an output file and verify its `sha256:` checksum.     |
 | `sub_builds`   | List additional directories whose BUILD files should be loaded.         |
 
 Image rules emit a small JSON "sum" (`<name>` image sum recording repo/tag/ID)
 as their primary output, so downstream rules can depend on an upstream image by
 referencing it.
+
+### Cache volumes
+
+A `container_run` rule may mount persistent, read-write volumes to cache
+build artifacts across runs — for example the Go module and build cache:
+
+```jsonx
+container_run {
+    Name:    "go-build",
+    Image:   "golang",
+    Command: ["go", "build", "-o", "/out/app", "./..."],
+    CacheVolumes: {
+        "/root/go/pkg": "go-pkg",
+    },
+    Output: { "app": "/out/app" },
+}
+```
+
+`CacheVolumes` maps an **absolute** container mount path (Docker does not
+expand `~`) to a logical cache name; the same name may be mounted at more
+than one path. Each name backs a single host-global Docker volume
+(`lets-cache-<name>`), so rules across every workspace on the host share one
+cache — matching how tool caches like Go's are meant to be used.
+
+Cache volumes are **not hermetic**: their contents are never hashed and
+never part of a rule's digest, so a rule's outputs must be identical whether
+the cache is warm or cold. Building with `-rebuild` empties every cache
+volume a rule mounts before running it (which, because the volumes are
+host-global, clears them for all workspaces).
 
 ## Command line
 
