@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestMakeDockerVars(t *testing.T) {
+func TestMakeEnvVars(t *testing.T) {
 	lookup := func(env map[string]string) func(string) (string, bool) {
 		return func(k string) (string, bool) {
 			v, ok := env[k]
@@ -63,7 +63,7 @@ func TestMakeDockerVars(t *testing.T) {
 	}
 }
 
-func TestMakeDockerVars_nilLookupUsesOSEnv(t *testing.T) {
+func TestMakeEnvVars_nilLookupUsesOSEnv(t *testing.T) {
 	t.Setenv("LETS_TEST_VAR", "hello")
 	got := makeEnvVars([]string{"LETS_TEST_VAR"}, nil)
 	want := map[string]string{"LETS_TEST_VAR": "hello"}
