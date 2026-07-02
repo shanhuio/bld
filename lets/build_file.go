@@ -17,11 +17,11 @@ func makeBuildFileNode(t string) any {
 		return new(FileSet)
 	case ruleBundle:
 		return new(Bundle)
-	case ruleDockerPull:
+	case ruleImagePull:
 		return new(ImagePull)
-	case ruleDockerBuild:
+	case ruleImageBuild:
 		return new(ImageBuild)
-	case ruleDockerRun:
+	case ruleContainerRun:
 		return new(ContainerRun)
 	case ruleDownload:
 		return new(Download)

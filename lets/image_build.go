@@ -100,7 +100,7 @@ func (b *imageBuild) meta(env *env) (*buildRuleMeta, error) {
 		OutputTar:  b.rule.OutputTar,
 	}
 
-	digest, err := makeDigest(ruleDockerBuild, b.name, &dat)
+	digest, err := makeDigest(ruleImageBuild, b.name, &dat)
 	if err != nil {
 		return nil, fmt.Errorf("digest: %w", err)
 	}

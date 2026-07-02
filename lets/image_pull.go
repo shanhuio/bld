@@ -127,7 +127,7 @@ func (p *imagePull) build(env *env, opts *buildOpts) error {
 }
 
 func (p *imagePull) meta(env *env) (*buildRuleMeta, error) {
-	digest, err := makeDigest(ruleDockerPull, p.name, p.rule)
+	digest, err := makeDigest(ruleImagePull, p.name, p.rule)
 	if err != nil {
 		return nil, fmt.Errorf("digest: %w", err)
 	}

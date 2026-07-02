@@ -3,12 +3,12 @@ package lets
 const (
 	ruleSubBuilds = "sub_builds" // not exactly a rule.
 
-	ruleFileSet     = "file_set"
-	ruleBundle      = "bundle"
-	ruleDockerPull  = "docker_pull"
-	ruleDockerBuild = "docker_build"
-	ruleDockerRun   = "docker_run"
-	ruleDownload    = "download"
+	ruleFileSet      = "file_set"
+	ruleBundle       = "bundle"
+	ruleImagePull    = "image_pull"
+	ruleImageBuild   = "image_build"
+	ruleContainerRun = "container_run"
+	ruleDownload     = "download"
 )
 
 // FileSet selects a set of files.

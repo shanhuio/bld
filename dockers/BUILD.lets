@@ -1,26 +1,26 @@
-docker_pull {
+image_pull {
     Name: "alpine",
     Pull: "alpine:3.23.4",
 }
 
-docker_build {
+image_build {
     Name: "base",
     From: ["alpine"],
 }
 
-docker_build {
+image_build {
     Name: "hatch",
     From: ["base"],
     Input: ["idle.go"],
     PrefixDir: ".",
 }
 
-docker_build {
+image_build {
     Name: "app",
     From: ["base"],
 }
 
-docker_build {
+image_build {
     Name: "nodejs",
     From: ["base"],
     Input: [
@@ -39,7 +39,7 @@ download {
     Output: "go-src.tgz",
 }
 
-docker_run {
+container_run {
     Name: "build_golang",
     Image: "hatch",
     Input: {
@@ -53,7 +53,7 @@ docker_run {
     Command: ["/bin/bash", "/root/build-go.sh"],
 }
 
-docker_build {
+image_build {
     Name: "golang",
     From: ["base"],
     Input: [
@@ -63,14 +63,14 @@ docker_build {
     PrefixDir: ".",
 }
 
-docker_build {
+image_build {
     Name: "forge",
     From: ["golang"],
     Input: ["idle.go"],
     PrefixDir: ".",
 }
 
-docker_build {
+image_build {
     Name: "bkgo",
     From: ["golang"],
 }

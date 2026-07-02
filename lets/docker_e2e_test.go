@@ -37,20 +37,20 @@ func dockerRmiTags(refs ...string) {
 	}
 }
 
-const e2eProj1Build = `docker_pull {
+const e2eProj1Build = `image_pull {
     Name: "alpine",
     Pull: "alpine:3.23",
 }
 `
 
-const e2eProj2Build = `docker_build {
+const e2eProj2Build = `image_build {
     Name: "app",
     From: ["/test.local/proj1/dockers/alpine"],
     Input: ["payload.txt"],
     PrefixDir: ".",
 }
 
-docker_run {
+container_run {
     Name: "smoke",
     Image: "app",
     Command: ["sh", "-c", "cat /payload.txt > /result.txt"],
@@ -59,7 +59,7 @@ docker_run {
     },
 }
 
-docker_run {
+container_run {
     Name: "verify",
     Image: "app",
     Input: {
@@ -143,19 +143,19 @@ const singleRepoWorkspace = `repo {
 }
 `
 
-const singleRepoBuild = `docker_pull {
+const singleRepoBuild = `image_pull {
     Name: "alpine",
     Pull: "alpine:3.23",
 }
 
-docker_build {
+image_build {
     Name: "hello",
     From: ["alpine"],
     Input: ["payload.txt"],
     PrefixDir: ".",
 }
 
-docker_run {
+container_run {
     Name: "smoke",
     Image: "hello",
     Command: ["sh", "-c", "cat /payload.txt > /result.txt"],
@@ -172,8 +172,8 @@ COPY payload.txt /payload.txt
 // TestE2E_singleRepoWithDep exercises Stage 3 of single-repo mode: the
 // workspace's self repo (test.local/proj2/dockers) declares one external
 // dependency (test.local/proj1/dockers), pre-checked-out under _/src.
-// The dep provides docker_pull alpine; the self repo's docker_build app
-// references it via an absolute "From" path; docker_run smoke/verify
+// The dep provides image_pull alpine; the self repo's image_build app
+// references it via an absolute "From" path; container_run smoke/verify
 // chain on top.
 func TestE2E_singleRepoWithDep(t *testing.T) {
 	requireDocker(t)

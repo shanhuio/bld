@@ -81,7 +81,7 @@ func (r *containerRun) meta(env *env) (*buildRuleMeta, error) {
 		Rule: r.rule,
 		Envs: r.envs,
 	}
-	digest, err := makeDigest(ruleDockerRun, r.name, &dat)
+	digest, err := makeDigest(ruleContainerRun, r.name, &dat)
 	if err != nil {
 		return nil, fmt.Errorf("digest: %w", err)
 	}
