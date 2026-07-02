@@ -22,7 +22,7 @@ func makeBuildFileNode(t string) any {
 	case ruleDockerBuild:
 		return new(ImageBuild)
 	case ruleDockerRun:
-		return new(DockerRun)
+		return new(ContainerRun)
 	case ruleDownload:
 		return new(Download)
 	case ruleSubBuilds:
@@ -92,8 +92,8 @@ func readBuildFile(env *env, p string) ([]*buildNode, []*lexing.Error) {
 				continue
 			}
 			node.rule = db
-		case *DockerRun:
-			node.rule = newDockerRun(env, p, v)
+		case *ContainerRun:
+			node.rule = newContainerRun(env, p, v)
 		case *Download:
 			d, err := newDownload(env, p, v)
 			if err != nil {

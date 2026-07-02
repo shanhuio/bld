@@ -11,10 +11,10 @@ import (
 	"shanhu.io/std/tarutil"
 )
 
-type dockerRun struct {
+type containerRun struct {
 	name    string
 	path    string
-	rule    *DockerRun
+	rule    *ContainerRun
 	image   string
 	ins     map[string]string
 	archIns map[string]string
@@ -24,7 +24,7 @@ type dockerRun struct {
 	envs    map[string]string
 }
 
-func newDockerRun(_ *env, p string, r *DockerRun) *dockerRun {
+func newContainerRun(_ *env, p string, r *ContainerRun) *containerRun {
 	name := makeRelPath(p, r.Name)
 
 	image := makePath(p, r.Image)
@@ -59,7 +59,7 @@ func newDockerRun(_ *env, p string, r *DockerRun) *dockerRun {
 	}
 	outs = sortedStrList(makeStrSet(outs))
 
-	return &dockerRun{
+	return &containerRun{
 		name:    name,
 		path:    p,
 		rule:    r,
@@ -73,9 +73,9 @@ func newDockerRun(_ *env, p string, r *DockerRun) *dockerRun {
 	}
 }
 
-func (r *dockerRun) meta(env *env) (*buildRuleMeta, error) {
+func (r *containerRun) meta(env *env) (*buildRuleMeta, error) {
 	dat := struct {
-		Rule *DockerRun
+		Rule *ContainerRun
 		Envs map[string]string `json:",omitempty"`
 	}{
 		Rule: r.rule,
@@ -94,7 +94,7 @@ func (r *dockerRun) meta(env *env) (*buildRuleMeta, error) {
 	}, nil
 }
 
-func (r *dockerRun) build(env *env, opts *buildOpts) error {
+func (r *containerRun) build(env *env, opts *buildOpts) error {
 	contConfig := &docker.ContConfig{
 		Cmd:     r.rule.Command,
 		WorkDir: r.rule.WorkDir,

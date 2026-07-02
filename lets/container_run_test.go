@@ -38,7 +38,7 @@ func TestDockerRunMountDir_dependency(t *testing.T) {
 
 	// A docker_run defined in the dependency's dockers/ subdirectory.
 	dir := dep + "/dockers"
-	r := newDockerRun(e, dir, &DockerRun{
+	r := newContainerRun(e, dir, &ContainerRun{
 		Name:     "smoke",
 		Image:    "app",
 		MountDir: "/dir",
@@ -46,7 +46,7 @@ func TestDockerRunMountDir_dependency(t *testing.T) {
 	})
 
 	if r.path != dir {
-		t.Fatalf("dockerRun.path = %q, want %q", r.path, dir)
+		t.Fatalf("containerRun.path = %q, want %q", r.path, dir)
 	}
 
 	got := e.src(r.path)
@@ -71,7 +71,7 @@ func TestDockerRunMountDir_selfRepo(t *testing.T) {
 	e := singleRepoEnvWithDep(root, self, dep)
 
 	dir := self + "/dockers"
-	r := newDockerRun(e, dir, &DockerRun{
+	r := newContainerRun(e, dir, &ContainerRun{
 		Name:     "smoke",
 		Image:    "app",
 		MountDir: "/dir",

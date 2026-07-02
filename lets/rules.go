@@ -58,8 +58,8 @@ type ImageBuild struct {
 	OutputTar    bool     `json:",omitempty"`
 }
 
-// DockerRun is a rule to run a command inside a docker container image.
-type DockerRun struct {
+// ContainerRun is a rule to run a command inside a docker container image.
+type ContainerRun struct {
 	Name    string
 	Image   string
 	User    string   `json:",omitempty"`
