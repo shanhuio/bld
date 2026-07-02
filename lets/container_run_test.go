@@ -24,11 +24,11 @@ func singleRepoEnvWithDep(root, self, dep string) *env {
 	}
 }
 
-// TestDockerRunMountDir_dependency checks that when a docker_run rule lives
+// TestContainerRunMountDir_dependency checks that when a container_run rule lives
 // in a repo that is a dependency of the root workspace, its MountDir target
 // resolves to that dependency's own build-file directory (under _/src), not
 // a path under the umbrella workspace root.
-func TestDockerRunMountDir_dependency(t *testing.T) {
+func TestContainerRunMountDir_dependency(t *testing.T) {
 	const (
 		root = "/ws"
 		self = "shanhu.io/bld"
@@ -36,7 +36,7 @@ func TestDockerRunMountDir_dependency(t *testing.T) {
 	)
 	e := singleRepoEnvWithDep(root, self, dep)
 
-	// A docker_run defined in the dependency's dockers/ subdirectory.
+	// A container_run defined in the dependency's dockers/ subdirectory.
 	dir := dep + "/dockers"
 	r := newContainerRun(e, dir, &ContainerRun{
 		Name:     "smoke",
@@ -60,9 +60,9 @@ func TestDockerRunMountDir_dependency(t *testing.T) {
 	}
 }
 
-// TestDockerRunMountDir_selfRepo checks the self-repo case: a rule in the
+// TestContainerRunMountDir_selfRepo checks the self-repo case: a rule in the
 // root repo mounts a directory directly under the workspace root.
-func TestDockerRunMountDir_selfRepo(t *testing.T) {
+func TestContainerRunMountDir_selfRepo(t *testing.T) {
 	const (
 		root = "/ws"
 		self = "shanhu.io/bld"
