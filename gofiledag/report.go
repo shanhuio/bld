@@ -10,22 +10,12 @@ import (
 )
 
 // PrintCheckResults writes a check-mode summary of results to w and returns
-// the number of failing passes.
+// the number of failing passes. Clean packages produce no output.
 func PrintCheckResults(w io.Writer, results []*Result, cwd string) int {
 	fails := 0
 	for _, r := range results {
-		header := fmt.Sprintf("%s [%s]", r.Pkg.PkgPath, r.Pass.Kind)
-		if r.Skipped != "" {
-			fmt.Fprintf(w, "warning: %s: skipped: %s\n", header, r.Skipped)
-			continue
-		}
-		if len(r.Violations) == 0 {
-			continue
-		}
-		fails++
-		fmt.Fprintf(w, "%s:\n", header)
-		for _, v := range r.Violations {
-			writeViolation(w, &v, cwd)
+		if writeResult(w, r, cwd, false) {
+			fails++
 		}
 	}
 	return fails
@@ -39,22 +29,35 @@ func PrintReportResults(w io.Writer, results []*Result, cwd string) int {
 		if i > 0 {
 			fmt.Fprintln(w)
 		}
-		header := fmt.Sprintf("%s [%s]", r.Pkg.PkgPath, r.Pass.Kind)
-		if r.Skipped != "" {
-			fmt.Fprintf(w, "warning: %s: skipped: %s\n", header, r.Skipped)
-			continue
-		}
-		fmt.Fprintf(w, "%s:\n", header)
-		if len(r.Violations) > 0 {
+		if writeResult(w, r, cwd, true) {
 			fails++
-			for _, v := range r.Violations {
-				writeViolation(w, &v, cwd)
-			}
-			continue
 		}
-		writeReport(w, r.Graph)
 	}
 	return fails
+}
+
+// writeResult writes a single result to w and reports whether it has
+// violations. A skipped pass produces a warning. A pass with violations
+// prints a header and each violation. For a clean pass, report mode prints
+// a header and the file DAG, while check mode prints nothing.
+func writeResult(w io.Writer, r *Result, cwd string, report bool) bool {
+	header := fmt.Sprintf("%s [%s]", r.Pkg.PkgPath, r.Pass.Kind)
+	if r.Skipped != "" {
+		fmt.Fprintf(w, "warning: %s: skipped: %s\n", header, r.Skipped)
+		return false
+	}
+	if len(r.Violations) > 0 {
+		fmt.Fprintf(w, "%s:\n", header)
+		for _, v := range r.Violations {
+			writeViolation(w, &v, cwd)
+		}
+		return true
+	}
+	if report {
+		fmt.Fprintf(w, "%s:\n", header)
+		writeReport(w, r.Graph)
+	}
+	return false
 }
 
 func writeViolation(w io.Writer, v *Violation, cwd string) {
