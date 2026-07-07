@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"shanhu.io/std/graph"
 )
 
 // PrintCheckResults writes a check-mode summary of results to w and returns
@@ -34,6 +36,43 @@ func PrintReportResults(w io.Writer, results []*Result, cwd string) int {
 		}
 	}
 	return fails
+}
+
+// buildGraph combines the file DAGs of all analyzed results into a single
+// graph.Graph. Each node is a file named by its path relative to cwd, with
+// its owning package path as the node comment; each edge is a file-to-file
+// reference. Files shared across passes of the same package are merged, and
+// skipped results (no graph) are omitted.
+func buildGraph(results []*Result, cwd string) (*graph.Graph, error) {
+	b := graph.NewBuilder()
+	for _, r := range results {
+		if r.Graph == nil {
+			continue
+		}
+		for _, f := range r.Graph.Files {
+			name := relPath(f, cwd)
+			if b.HasNode(name) {
+				continue
+			}
+			if _, err := b.AddNode(name, r.Pkg.PkgPath); err != nil {
+				return nil, err
+			}
+		}
+	}
+	for _, r := range results {
+		if r.Graph == nil {
+			continue
+		}
+		for _, from := range r.Graph.Files {
+			fromName := relPath(from, cwd)
+			for _, to := range r.Graph.successors(from) {
+				if err := b.AddEdge(fromName, relPath(to, cwd)); err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+	return b.Build(), nil
 }
 
 // writeResult writes a single result to w and reports whether it has

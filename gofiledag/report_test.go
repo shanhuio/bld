@@ -3,10 +3,12 @@ package gofiledag
 import (
 	"bytes"
 	"go/token"
+	"reflect"
 	"strings"
 	"testing"
 
 	"golang.org/x/tools/go/packages"
+	"shanhu.io/std/graph"
 )
 
 // makeResult builds a Result in memory, without loading real packages, so
@@ -208,5 +210,75 @@ func TestRelPos(t *testing.T) {
 	pos := token.Position{Filename: "/a/b/c.go", Line: 3, Column: 5}
 	if got, want := relPos(pos, "/a/b"), "c.go:3:5"; got != want {
 		t.Errorf("relPos = %q, want %q", got, want)
+	}
+}
+
+func TestBuildGraph(t *testing.T) {
+	r := makeResult("example.com/pkg", PassProd)
+	r.Graph = graphOf(
+		[]string{"/ws/a.go", "/ws/b.go"},
+		map[string][]string{"/ws/a.go": {"/ws/b.go"}},
+	)
+
+	g, err := buildGraph([]*Result{r}, "/ws")
+	if err != nil {
+		t.Fatalf("buildGraph: %v", err)
+	}
+	v, err := graph.NewViewer(g)
+	if err != nil {
+		t.Fatalf("NewViewer: %v", err)
+	}
+	if v.Len() != 2 {
+		t.Fatalf("nodes = %d, want 2", v.Len())
+	}
+	if n := v.Node("a.go"); n == nil || n.Comment != "example.com/pkg" {
+		t.Errorf("node a.go = %+v, want comment example.com/pkg", n)
+	}
+	if got := v.Outs("a.go"); !reflect.DeepEqual(got, []string{"b.go"}) {
+		t.Errorf("Outs(a.go) = %v, want [b.go]", got)
+	}
+	if got := v.Outs("b.go"); len(got) != 0 {
+		t.Errorf("Outs(b.go) = %v, want none", got)
+	}
+}
+
+// TestBuildGraph_dedupsAcrossPasses checks that a file shared by the
+// production and internal-test passes of one package becomes a single node.
+func TestBuildGraph_dedupsAcrossPasses(t *testing.T) {
+	prod := makeResult("example.com/pkg", PassProd)
+	prod.Graph = graphOf([]string{"/ws/a.go"}, nil)
+
+	test := makeResult("example.com/pkg", PassInternalTest)
+	test.Graph = graphOf(
+		[]string{"/ws/a.go", "/ws/a_test.go"},
+		map[string][]string{"/ws/a_test.go": {"/ws/a.go"}},
+	)
+
+	g, err := buildGraph([]*Result{prod, test}, "/ws")
+	if err != nil {
+		t.Fatalf("buildGraph: %v", err)
+	}
+	v, err := graph.NewViewer(g)
+	if err != nil {
+		t.Fatalf("NewViewer: %v", err)
+	}
+	if v.Len() != 2 {
+		t.Fatalf("nodes = %d, want 2 (a.go merged): %+v", v.Len(), g.Nodes)
+	}
+	if got := v.Outs("a_test.go"); !reflect.DeepEqual(got, []string{"a.go"}) {
+		t.Errorf("Outs(a_test.go) = %v, want [a.go]", got)
+	}
+}
+
+func TestBuildGraph_skipsNilGraph(t *testing.T) {
+	skipped := makeResult("example.com/pkg", PassProd)
+	skipped.Skipped = "generated"
+
+	g, err := buildGraph([]*Result{skipped}, "/ws")
+	if err != nil {
+		t.Fatalf("buildGraph: %v", err)
+	}
+	if len(g.Nodes) != 0 || len(g.Edges) != 0 {
+		t.Errorf("graph = %+v, want empty for skipped result", g)
 	}
 }

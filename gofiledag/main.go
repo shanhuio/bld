@@ -1,6 +1,7 @@
 package gofiledag
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -8,8 +9,10 @@ import (
 )
 
 // Main runs the gofiledag tool over args. It always reports rule violations
-// to stdout. When the -report_output flag is non-empty, the file DAG for each
-// package is also written to that file. It returns a process exit code: 0 on
+// to stdout. When the -report_output flag is non-empty, a human-readable file
+// DAG for each package is written to that file; when -graph_output is
+// non-empty, the combined file DAG is written there as JSON in the
+// shanhu.io/std/graph.Graph format. It returns a process exit code: 0 on
 // success, non-zero on a load/output failure or when violations are found.
 func Main(args []string) int {
 	fs := flag.NewFlagSet("gofiledag", flag.ExitOnError)
@@ -17,7 +20,11 @@ func Main(args []string) int {
 	goos := fs.String("goos", runtime.GOOS, "target GOOS")
 	goarch := fs.String("goarch", runtime.GOARCH, "target GOARCH")
 	reportOutput := fs.String(
-		"report_output", "", "if set, write the file graph to this file",
+		"report_output", "", "if set, write the file graph report to this file",
+	)
+	graphOutput := fs.String(
+		"graph_output", "",
+		"if set, write the file graph as JSON (std/graph.Graph) to this file",
 	)
 	fs.Parse(args)
 
@@ -50,6 +57,13 @@ func Main(args []string) int {
 
 	if *reportOutput != "" {
 		if err := writeReportFile(*reportOutput, results, cwd); err != nil {
+			fmt.Fprintln(os.Stderr, "report output:", err)
+			return 1
+		}
+	}
+
+	if *graphOutput != "" {
+		if err := writeGraphFile(*graphOutput, results, cwd); err != nil {
 			fmt.Fprintln(os.Stderr, "graph output:", err)
 			return 1
 		}
@@ -69,4 +83,19 @@ func writeReportFile(file string, results []*Result, cwd string) error {
 	}
 	PrintReportResults(f, results, cwd)
 	return f.Close()
+}
+
+// writeGraphFile writes the combined file DAG of results to file as indented
+// JSON in the shanhu.io/std/graph.Graph format.
+func writeGraphFile(file string, results []*Result, cwd string) error {
+	g, err := buildGraph(results, cwd)
+	if err != nil {
+		return err
+	}
+	bs, err := json.MarshalIndent(g, "", "  ")
+	if err != nil {
+		return err
+	}
+	bs = append(bs, '\n')
+	return os.WriteFile(file, bs, 0644)
 }
