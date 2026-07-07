@@ -47,7 +47,9 @@ func findRoot(cur string) (string, error) {
 }
 
 // isRepoRoot reports whether dir is a workspace root: it holds a .letsroot
-// stamp file or a .git directory.
+// stamp file or a .git entry. The .git entry is a directory in a normal
+// checkout, but a regular file (a "gitdir:" pointer) in a linked worktree
+// or a submodule, so any .git entry counts.
 func isRepoRoot(dir string) (bool, error) {
 	stamp, err := isRegularFile(filepath.Join(dir, letsRootFile))
 	if err != nil {
@@ -56,7 +58,7 @@ func isRepoRoot(dir string) (bool, error) {
 	if stamp {
 		return true, nil
 	}
-	return isDir(filepath.Join(dir, ".git"))
+	return pathExists(filepath.Join(dir, ".git"))
 }
 
 // NewBuilder creates a new builder that builds stuff.

@@ -168,6 +168,29 @@ func TestFindRoot_gitDir(t *testing.T) {
 	}
 }
 
+// TestFindRoot_gitFile covers a linked worktree, where .git is a regular
+// file holding a "gitdir:" pointer rather than a directory.
+func TestFindRoot_gitFile(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t,
+		filepath.Join(root, ".git"),
+		"gitdir: /some/where/.git/worktrees/wt\n",
+	)
+
+	sub := filepath.Join(root, "pkg")
+	if err := os.MkdirAll(sub, 0755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+
+	got, err := findRoot(sub)
+	if err != nil {
+		t.Fatalf("findRoot: %v", err)
+	}
+	if got != root {
+		t.Errorf("findRoot(%q) = %q, want %q", sub, got, root)
+	}
+}
+
 func TestSaveRepoSums_empty_removesExistingFile(t *testing.T) {
 	f := filepath.Join(t.TempDir(), "sums.jsonx")
 	if err := os.WriteFile(f, []byte("{ RepoCommits: {} }\n"), 0644); err != nil {

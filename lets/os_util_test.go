@@ -95,3 +95,36 @@ func TestIsDir(t *testing.T) {
 		})
 	}
 }
+
+func TestPathExists(t *testing.T) {
+	dir := t.TempDir()
+	file := filepath.Join(dir, "f.txt")
+	if err := os.WriteFile(file, []byte("hi"), 0644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+	link := filepath.Join(dir, "link")
+	if err := os.Symlink(file, link); err != nil {
+		t.Fatalf("setup symlink: %v", err)
+	}
+
+	for _, c := range []struct {
+		name string
+		path string
+		want bool
+	}{
+		{"directory", dir, true},
+		{"regular file", file, true},
+		{"symlink", link, true},
+		{"missing", filepath.Join(dir, "nope"), false},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			got, err := pathExists(c.path)
+			if err != nil {
+				t.Fatalf("pathExists: %v", err)
+			}
+			if got != c.want {
+				t.Errorf("pathExists(%q) = %v, want %v", c.path, got, c.want)
+			}
+		})
+	}
+}

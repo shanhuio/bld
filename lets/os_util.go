@@ -45,3 +45,14 @@ func isDir(path string) (bool, error) {
 
 	return stat.IsDir(), nil
 }
+
+// pathExists reports whether path exists, regardless of its type.
+func pathExists(path string) (bool, error) {
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
