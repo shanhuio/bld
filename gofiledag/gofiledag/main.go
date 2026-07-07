@@ -15,7 +15,7 @@ flags:
   -tags=...           comma-separated build tags
   -goos=...           target GOOS (default: current go env)
   -goarch=...         target GOARCH (default: current go env)
-  -graph_output=...   if set, write the file DAG for each package to this file
+  -report_output=...  if set, write the file DAG for each package to this file
 
 packages default to "./...".
 `

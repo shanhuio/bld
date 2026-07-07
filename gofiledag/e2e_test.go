@@ -154,10 +154,10 @@ func TestPrintCheckResults_clean(t *testing.T) {
 	}
 }
 
-func TestPrintGraphResults_clean(t *testing.T) {
+func TestPrintReportResults_clean(t *testing.T) {
 	r := analyzeFixture(t, "acyclic")
 	var buf bytes.Buffer
-	fails := PrintGraphResults(&buf, []*Result{r}, "")
+	fails := PrintReportResults(&buf, []*Result{r}, "")
 	if fails != 0 {
 		t.Errorf("fails = %d, want 0", fails)
 	}

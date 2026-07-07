@@ -8,7 +8,7 @@ import (
 )
 
 // Main runs the gofiledag tool over args. It always reports rule violations
-// to stdout. When the -graph_output flag is non-empty, the file DAG for each
+// to stdout. When the -report_output flag is non-empty, the file DAG for each
 // package is also written to that file. It returns a process exit code: 0 on
 // success, non-zero on a load/output failure or when violations are found.
 func Main(args []string) int {
@@ -16,8 +16,8 @@ func Main(args []string) int {
 	tags := fs.String("tags", "", "comma-separated build tags")
 	goos := fs.String("goos", runtime.GOOS, "target GOOS")
 	goarch := fs.String("goarch", runtime.GOARCH, "target GOARCH")
-	graphOutput := fs.String(
-		"graph_output", "", "if set, write the file graph to this file",
+	reportOutput := fs.String(
+		"report_output", "", "if set, write the file graph to this file",
 	)
 	fs.Parse(args)
 
@@ -48,8 +48,8 @@ func Main(args []string) int {
 
 	results := AnalyzePasses(passes)
 
-	if *graphOutput != "" {
-		if err := writeGraphFile(*graphOutput, results, cwd); err != nil {
+	if *reportOutput != "" {
+		if err := writeReportFile(*reportOutput, results, cwd); err != nil {
 			fmt.Fprintln(os.Stderr, "graph output:", err)
 			return 1
 		}
@@ -62,11 +62,11 @@ func Main(args []string) int {
 	return 0
 }
 
-func writeGraphFile(file string, results []*Result, cwd string) error {
+func writeReportFile(file string, results []*Result, cwd string) error {
 	f, err := os.Create(file)
 	if err != nil {
 		return err
 	}
-	PrintGraphResults(f, results, cwd)
+	PrintReportResults(f, results, cwd)
 	return f.Close()
 }

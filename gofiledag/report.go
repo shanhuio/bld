@@ -31,9 +31,9 @@ func PrintCheckResults(w io.Writer, results []*Result, cwd string) int {
 	return fails
 }
 
-// PrintGraphResults writes the graph for each passing package, and the
+// PrintReportResults writes the graph for each passing package, and the
 // violations for each failing package. Returns the number of failing passes.
-func PrintGraphResults(w io.Writer, results []*Result, cwd string) int {
+func PrintReportResults(w io.Writer, results []*Result, cwd string) int {
 	fails := 0
 	for i, r := range results {
 		if i > 0 {
@@ -52,7 +52,7 @@ func PrintGraphResults(w io.Writer, results []*Result, cwd string) int {
 			}
 			continue
 		}
-		writeGraph(w, r.Graph)
+		writeReport(w, r.Graph)
 	}
 	return fails
 }
@@ -75,9 +75,9 @@ func writeViolation(w io.Writer, v *Violation, cwd string) {
 	}
 }
 
-// writeGraph writes the file DAG as ranked layers followed by an adjacency
+// writeReport writes the file DAG as ranked layers followed by an adjacency
 // list. Layers are computed by Kahn-style longest-path ranking.
-func writeGraph(w io.Writer, g *FileGraph) {
+func writeReport(w io.Writer, g *FileGraph) {
 	if g == nil || len(g.Files) == 0 {
 		fmt.Fprintln(w, "  (no files)")
 		return
