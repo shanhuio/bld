@@ -1,43 +1,95 @@
 package gofiledag
 
-import "testing"
+import (
+	"reflect"
+	"testing"
 
-func TestBuildFileGraph_simpleEdge(t *testing.T) {
-	pkg := parsePkg(t, map[string]string{
-		"a.go": "package test\n\nfunc UseB() int { return B }\n",
-		"b.go": "package test\n\nconst B = 1\n",
-	})
-	g := buildFileGraph(pkg)
-	if got := g.Edges["a.go"]["b.go"]; got == nil {
-		t.Fatal("missing edge a.go -> b.go")
-	} else if got.Symbol != "B" {
-		t.Errorf("edge symbol = %q, want B", got.Symbol)
+	"shanhu.io/std/graph"
+)
+
+func TestBuildGraph(t *testing.T) {
+	r := makeResult("example.com/pkg", PassProd)
+	r.Graph = graphOf(
+		[]string{"/ws/a.go", "/ws/b.go"},
+		map[string][]string{"/ws/a.go": {"/ws/b.go"}},
+	)
+
+	g, err := buildGraph([]*Result{r}, "/ws")
+	if err != nil {
+		t.Fatalf("buildGraph: %v", err)
 	}
-	if _, ok := g.Edges["b.go"]; ok {
-		t.Errorf("unexpected outgoing edges from b.go: %v", g.Edges["b.go"])
+	if g.Name != "example.com/pkg" {
+		t.Errorf("graph Name = %q, want example.com/pkg", g.Name)
+	}
+	v, err := graph.NewViewer(g)
+	if err != nil {
+		t.Fatalf("NewViewer: %v", err)
+	}
+	if v.Len() != 2 {
+		t.Fatalf("nodes = %d, want 2", v.Len())
+	}
+	// Node names drop the ".go" suffix. a.go uses b.go, so the edge points
+	// from the dependency b to the dependent a.
+	if got := v.Outs("b"); !reflect.DeepEqual(got, []string{"a"}) {
+		t.Errorf("Outs(b) = %v, want [a]", got)
+	}
+	if got := v.Outs("a"); len(got) != 0 {
+		t.Errorf("Outs(a) = %v, want none", got)
 	}
 }
 
-func TestBuildFileGraph_noSelfEdges(t *testing.T) {
-	pkg := parsePkg(t, map[string]string{
-		"a.go": "package test\n\nconst X = 1\n\nfunc UseX() int { return X }\n",
-	})
-	g := buildFileGraph(pkg)
-	if len(g.Edges) != 0 {
-		t.Errorf("expected no edges, got %v", g.Edges)
+func TestBuildGraph_multiplePackagesError(t *testing.T) {
+	a := makeResult("example.com/a", PassProd)
+	a.Graph = graphOf([]string{"/ws/a/x.go"}, nil)
+	b := makeResult("example.com/b", PassProd)
+	b.Graph = graphOf([]string{"/ws/b/y.go"}, nil)
+
+	if _, err := buildGraph([]*Result{a, b}, "/ws"); err == nil {
+		t.Fatal("buildGraph: want error for multiple packages, got nil")
 	}
 }
 
-func TestBuildFileGraph_cycle(t *testing.T) {
-	pkg := parsePkg(t, map[string]string{
-		"a.go": "package test\n\nfunc UseB() int { return B }\n\nconst A = 2\n",
-		"b.go": "package test\n\nfunc UseA() int { return A }\n\nconst B = 1\n",
-	})
-	g := buildFileGraph(pkg)
-	if g.Edges["a.go"]["b.go"] == nil {
-		t.Error("missing edge a.go -> b.go")
+// TestBuildGraph_dedupsAcrossPasses checks that a file shared by the
+// production and internal-test passes of one package becomes a single node.
+func TestBuildGraph_dedupsAcrossPasses(t *testing.T) {
+	prod := makeResult("example.com/pkg", PassProd)
+	prod.Graph = graphOf([]string{"/ws/a.go"}, nil)
+
+	test := makeResult("example.com/pkg", PassInternalTest)
+	test.Graph = graphOf(
+		[]string{"/ws/a.go", "/ws/a_test.go"},
+		map[string][]string{"/ws/a_test.go": {"/ws/a.go"}},
+	)
+
+	g, err := buildGraph([]*Result{prod, test}, "/ws")
+	if err != nil {
+		t.Fatalf("buildGraph: %v", err)
 	}
-	if g.Edges["b.go"]["a.go"] == nil {
-		t.Error("missing edge b.go -> a.go")
+	if g.Name != "example.com/pkg" {
+		t.Errorf("graph Name = %q, want example.com/pkg", g.Name)
+	}
+	v, err := graph.NewViewer(g)
+	if err != nil {
+		t.Fatalf("NewViewer: %v", err)
+	}
+	if v.Len() != 2 {
+		t.Fatalf("nodes = %d, want 2 (a.go merged): %+v", v.Len(), g.Nodes)
+	}
+	// a_test.go uses a.go, so the edge points from a to a_test.
+	if got := v.Outs("a"); !reflect.DeepEqual(got, []string{"a_test"}) {
+		t.Errorf("Outs(a) = %v, want [a_test]", got)
+	}
+}
+
+func TestBuildGraph_skipsNilGraph(t *testing.T) {
+	skipped := makeResult("example.com/pkg", PassProd)
+	skipped.Skipped = "generated"
+
+	g, err := buildGraph([]*Result{skipped}, "/ws")
+	if err != nil {
+		t.Fatalf("buildGraph: %v", err)
+	}
+	if len(g.Nodes) != 0 || len(g.Edges) != 0 {
+		t.Errorf("graph = %+v, want empty for skipped result", g)
 	}
 }

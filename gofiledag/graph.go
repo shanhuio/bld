@@ -1,78 +1,68 @@
 package gofiledag
 
 import (
-	"go/token"
-	"sort"
+	"fmt"
+	"strings"
 
-	"golang.org/x/tools/go/packages"
+	"shanhu.io/std/graph"
 )
 
-// FileGraph is a directed graph of file-to-file references within a package.
-// Each edge records one example reference (the first one encountered).
-type FileGraph struct {
-	Files []string                    // package files, sorted
-	Edges map[string]map[string]*Edge // from -> to -> example
+// nodeName is the graph node name for a file: its path relative to cwd with
+// the ".go" suffix dropped.
+func nodeName(f, cwd string) string {
+	return strings.TrimSuffix(relPath(f, cwd), ".go")
 }
 
-// Edge records one example reason file From depends on file To.
-type Edge struct {
-	Symbol string         // referenced symbol name
-	UsePos token.Position // location of the reference
-	DefPos token.Position // location of the symbol definition
-}
-
-func buildFileGraph(pkg *packages.Package) *FileGraph {
-	fset := pkg.Fset
-	fileSet := make(map[string]bool)
-	for _, f := range pkg.Syntax {
-		fileSet[fset.Position(f.Pos()).Filename] = true
+// buildGraph builds the file DAG of a single package as a graph.Graph
+// titled with its import path. Nodes are files named by their path relative
+// to cwd without the ".go" suffix. Each edge points from a referenced file
+// to the file that references it (dependency to dependent), so the graph
+// flows from leaf files upward. The package's several passes (production and
+// internal-test) are merged, and skipped results (no graph) are ignored. It
+// returns an error if the results span more than one package, since a single
+// graph describes a single package.
+func buildGraph(results []*Result, cwd string) (*graph.Graph, error) {
+	var pkgPath string
+	havePkg := false
+	var graphed []*Result
+	for _, r := range results {
+		if r.Graph == nil {
+			continue
+		}
+		if !havePkg {
+			pkgPath, havePkg = r.Pkg.PkgPath, true
+		} else if r.Pkg.PkgPath != pkgPath {
+			return nil, fmt.Errorf(
+				"graph output requires a single package, found %q and %q",
+				pkgPath, r.Pkg.PkgPath,
+			)
+		}
+		graphed = append(graphed, r)
 	}
 
-	edges := make(map[string]map[string]*Edge)
-	for ident, obj := range pkg.TypesInfo.Uses {
-		if obj.Pkg() != pkg.Types {
-			continue
-		}
-		if obj.Pos() == token.NoPos {
-			continue
-		}
-		usePos := fset.Position(ident.Pos())
-		defPos := fset.Position(obj.Pos())
-		if usePos.Filename == defPos.Filename {
-			continue
-		}
-		if !fileSet[usePos.Filename] || !fileSet[defPos.Filename] {
-			continue
-		}
-		toMap, ok := edges[usePos.Filename]
-		if !ok {
-			toMap = make(map[string]*Edge)
-			edges[usePos.Filename] = toMap
-		}
-		if _, exists := toMap[defPos.Filename]; exists {
-			continue
-		}
-		toMap[defPos.Filename] = &Edge{
-			Symbol: obj.Name(),
-			UsePos: usePos,
-			DefPos: defPos,
+	b := graph.NewBuilder()
+	b.SetName(pkgPath)
+	for _, r := range graphed {
+		for _, f := range r.Graph.Files {
+			name := nodeName(f, cwd)
+			if b.HasNode(name) {
+				continue
+			}
+			if _, err := b.AddNode(name, ""); err != nil {
+				return nil, err
+			}
 		}
 	}
-
-	files := make([]string, 0, len(fileSet))
-	for f := range fileSet {
-		files = append(files, f)
+	for _, r := range graphed {
+		for _, from := range r.Graph.Files {
+			fromName := nodeName(from, cwd)
+			for _, to := range r.Graph.successors(from) {
+				// Edge points from the dependency to the dependent.
+				if err := b.AddEdge(nodeName(to, cwd), fromName); err != nil {
+					return nil, err
+				}
+			}
+		}
 	}
-	sort.Strings(files)
-	return &FileGraph{Files: files, Edges: edges}
-}
-
-// successors returns a sorted slice of the out-neighbors of v.
-func (g *FileGraph) successors(v string) []string {
-	var s []string
-	for w := range g.Edges[v] {
-		s = append(s, w)
-	}
-	sort.Strings(s)
-	return s
+	return b.Build(), nil
 }
