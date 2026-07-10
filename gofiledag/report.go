@@ -38,12 +38,19 @@ func PrintReportResults(w io.Writer, results []*Result, cwd string) int {
 	return fails
 }
 
+// nodeName is the graph node name for a file: its path relative to cwd with
+// the ".go" suffix dropped.
+func nodeName(f, cwd string) string {
+	return strings.TrimSuffix(relPath(f, cwd), ".go")
+}
+
 // buildGraph builds the file DAG of a single package as a graph.Graph
 // titled with its import path. Nodes are files named by their path relative
-// to cwd; edges are file-to-file references. The package's several passes
-// (production and internal-test) are merged, and skipped results (no graph)
-// are ignored. It returns an error if the results span more than one
-// package, since a single graph describes a single package.
+// to cwd without the ".go" suffix; edges are file-to-file references. The
+// package's several passes (production and internal-test) are merged, and
+// skipped results (no graph) are ignored. It returns an error if the results
+// span more than one package, since a single graph describes a single
+// package.
 func buildGraph(results []*Result, cwd string) (*graph.Graph, error) {
 	var pkgPath string
 	havePkg := false
@@ -67,7 +74,7 @@ func buildGraph(results []*Result, cwd string) (*graph.Graph, error) {
 	b.SetName(pkgPath)
 	for _, r := range graphed {
 		for _, f := range r.Graph.Files {
-			name := relPath(f, cwd)
+			name := nodeName(f, cwd)
 			if b.HasNode(name) {
 				continue
 			}
@@ -78,9 +85,9 @@ func buildGraph(results []*Result, cwd string) (*graph.Graph, error) {
 	}
 	for _, r := range graphed {
 		for _, from := range r.Graph.Files {
-			fromName := relPath(from, cwd)
+			fromName := nodeName(from, cwd)
 			for _, to := range r.Graph.successors(from) {
-				if err := b.AddEdge(fromName, relPath(to, cwd)); err != nil {
+				if err := b.AddEdge(fromName, nodeName(to, cwd)); err != nil {
 					return nil, err
 				}
 			}

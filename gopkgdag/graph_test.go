@@ -68,6 +68,22 @@ func TestBuildGraph_skipsEmptyPkgPath(t *testing.T) {
 	}
 }
 
+func TestBuildGraph_moduleName(t *testing.T) {
+	mod := &packages.Module{Path: "example.com/m", Main: true}
+	a := pkg("example.com/m/a", "a")
+	a.Module = mod
+	b := pkg("example.com/m/b", "b")
+	b.Module = mod
+
+	g, err := BuildGraph([]*packages.Package{a, b})
+	if err != nil {
+		t.Fatalf("BuildGraph: %v", err)
+	}
+	if g.Name != "example.com/m" {
+		t.Errorf("graph Name = %q, want example.com/m", g.Name)
+	}
+}
+
 func TestBuildGraph_empty(t *testing.T) {
 	g, err := BuildGraph(nil)
 	if err != nil {

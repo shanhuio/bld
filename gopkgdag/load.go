@@ -35,7 +35,9 @@ func Load(cfg *LoadConfig, patterns []string) ([]*packages.Package, error) {
 	}
 
 	c := &packages.Config{
-		Mode:       packages.NeedName | packages.NeedImports,
+		Mode: packages.NeedName |
+			packages.NeedImports |
+			packages.NeedModule,
 		Dir:        cfg.Dir,
 		Env:        env,
 		BuildFlags: buildFlags,
