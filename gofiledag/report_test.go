@@ -224,6 +224,9 @@ func TestBuildGraph(t *testing.T) {
 	if err != nil {
 		t.Fatalf("buildGraph: %v", err)
 	}
+	if g.Name != "example.com/pkg" {
+		t.Errorf("graph Name = %q, want example.com/pkg", g.Name)
+	}
 	v, err := graph.NewViewer(g)
 	if err != nil {
 		t.Fatalf("NewViewer: %v", err)
@@ -231,14 +234,22 @@ func TestBuildGraph(t *testing.T) {
 	if v.Len() != 2 {
 		t.Fatalf("nodes = %d, want 2", v.Len())
 	}
-	if n := v.Node("a.go"); n == nil || n.Comment != "example.com/pkg" {
-		t.Errorf("node a.go = %+v, want comment example.com/pkg", n)
-	}
 	if got := v.Outs("a.go"); !reflect.DeepEqual(got, []string{"b.go"}) {
 		t.Errorf("Outs(a.go) = %v, want [b.go]", got)
 	}
 	if got := v.Outs("b.go"); len(got) != 0 {
 		t.Errorf("Outs(b.go) = %v, want none", got)
+	}
+}
+
+func TestBuildGraph_multiplePackagesError(t *testing.T) {
+	a := makeResult("example.com/a", PassProd)
+	a.Graph = graphOf([]string{"/ws/a/x.go"}, nil)
+	b := makeResult("example.com/b", PassProd)
+	b.Graph = graphOf([]string{"/ws/b/y.go"}, nil)
+
+	if _, err := buildGraph([]*Result{a, b}, "/ws"); err == nil {
+		t.Fatal("buildGraph: want error for multiple packages, got nil")
 	}
 }
 
@@ -257,6 +268,9 @@ func TestBuildGraph_dedupsAcrossPasses(t *testing.T) {
 	g, err := buildGraph([]*Result{prod, test}, "/ws")
 	if err != nil {
 		t.Fatalf("buildGraph: %v", err)
+	}
+	if g.Name != "example.com/pkg" {
+		t.Errorf("graph Name = %q, want example.com/pkg", g.Name)
 	}
 	v, err := graph.NewViewer(g)
 	if err != nil {

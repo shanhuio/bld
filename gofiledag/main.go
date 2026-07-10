@@ -11,9 +11,11 @@ import (
 // Main runs the gofiledag tool over args. It always reports rule violations
 // to stdout. When the -report_output flag is non-empty, a human-readable file
 // DAG for each package is written to that file; when -graph_output is
-// non-empty, the combined file DAG is written there as JSON in the
-// shanhu.io/std/graph.Graph format. It returns a process exit code: 0 on
-// success, non-zero on a load/output failure or when violations are found.
+// non-empty, the file DAG of the single package under analysis is written
+// there as JSON in the shanhu.io/std/graph.Graph format (it is an error to
+// combine -graph_output with more than one package). It returns a process
+// exit code: 0 on success, non-zero on a load/output failure or when
+// violations are found.
 func Main(args []string) int {
 	fs := flag.NewFlagSet("gofiledag", flag.ExitOnError)
 	tags := fs.String("tags", "", "comma-separated build tags")
@@ -85,8 +87,9 @@ func writeReportFile(file string, results []*Result, cwd string) error {
 	return f.Close()
 }
 
-// writeGraphFile writes the combined file DAG of results to file as indented
-// JSON in the shanhu.io/std/graph.Graph format.
+// writeGraphFile writes the single package's file DAG to file as indented
+// JSON in the shanhu.io/std/graph.Graph format. It fails if results span
+// more than one package.
 func writeGraphFile(file string, results []*Result, cwd string) error {
 	g, err := buildGraph(results, cwd)
 	if err != nil {

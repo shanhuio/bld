@@ -16,7 +16,7 @@ flags:
   -goos=...           target GOOS (default: current go env)
   -goarch=...         target GOARCH (default: current go env)
   -report_output=...  if set, write the file DAG report for each package here
-  -graph_output=...   if set, write the combined file DAG as JSON here
+  -graph_output=...   if set, write the single package's file DAG as JSON here
 
 packages default to "./...".
 `

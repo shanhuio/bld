@@ -38,31 +38,45 @@ func PrintReportResults(w io.Writer, results []*Result, cwd string) int {
 	return fails
 }
 
-// buildGraph combines the file DAGs of all analyzed results into a single
-// graph.Graph. Each node is a file named by its path relative to cwd, with
-// its owning package path as the node comment; each edge is a file-to-file
-// reference. Files shared across passes of the same package are merged, and
-// skipped results (no graph) are omitted.
+// buildGraph builds the file DAG of a single package as a graph.Graph
+// titled with its import path. Nodes are files named by their path relative
+// to cwd; edges are file-to-file references. The package's several passes
+// (production and internal-test) are merged, and skipped results (no graph)
+// are ignored. It returns an error if the results span more than one
+// package, since a single graph describes a single package.
 func buildGraph(results []*Result, cwd string) (*graph.Graph, error) {
-	b := graph.NewBuilder()
+	var pkgPath string
+	havePkg := false
+	var graphed []*Result
 	for _, r := range results {
 		if r.Graph == nil {
 			continue
 		}
+		if !havePkg {
+			pkgPath, havePkg = r.Pkg.PkgPath, true
+		} else if r.Pkg.PkgPath != pkgPath {
+			return nil, fmt.Errorf(
+				"graph output requires a single package, found %q and %q",
+				pkgPath, r.Pkg.PkgPath,
+			)
+		}
+		graphed = append(graphed, r)
+	}
+
+	b := graph.NewBuilder()
+	b.SetName(pkgPath)
+	for _, r := range graphed {
 		for _, f := range r.Graph.Files {
 			name := relPath(f, cwd)
 			if b.HasNode(name) {
 				continue
 			}
-			if _, err := b.AddNode(name, r.Pkg.PkgPath); err != nil {
+			if _, err := b.AddNode(name, ""); err != nil {
 				return nil, err
 			}
 		}
 	}
-	for _, r := range results {
-		if r.Graph == nil {
-			continue
-		}
+	for _, r := range graphed {
 		for _, from := range r.Graph.Files {
 			fromName := relPath(from, cwd)
 			for _, to := range r.Graph.successors(from) {
