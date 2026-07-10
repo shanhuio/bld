@@ -46,11 +46,12 @@ func nodeName(f, cwd string) string {
 
 // buildGraph builds the file DAG of a single package as a graph.Graph
 // titled with its import path. Nodes are files named by their path relative
-// to cwd without the ".go" suffix; edges are file-to-file references. The
-// package's several passes (production and internal-test) are merged, and
-// skipped results (no graph) are ignored. It returns an error if the results
-// span more than one package, since a single graph describes a single
-// package.
+// to cwd without the ".go" suffix. Each edge points from a referenced file
+// to the file that references it (dependency to dependent), so the graph
+// flows from leaf files upward. The package's several passes (production and
+// internal-test) are merged, and skipped results (no graph) are ignored. It
+// returns an error if the results span more than one package, since a single
+// graph describes a single package.
 func buildGraph(results []*Result, cwd string) (*graph.Graph, error) {
 	var pkgPath string
 	havePkg := false
@@ -87,7 +88,8 @@ func buildGraph(results []*Result, cwd string) (*graph.Graph, error) {
 		for _, from := range r.Graph.Files {
 			fromName := nodeName(from, cwd)
 			for _, to := range r.Graph.successors(from) {
-				if err := b.AddEdge(fromName, nodeName(to, cwd)); err != nil {
+				// Edge points from the dependency to the dependent.
+				if err := b.AddEdge(nodeName(to, cwd), fromName); err != nil {
 					return nil, err
 				}
 			}

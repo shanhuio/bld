@@ -234,12 +234,13 @@ func TestBuildGraph(t *testing.T) {
 	if v.Len() != 2 {
 		t.Fatalf("nodes = %d, want 2", v.Len())
 	}
-	// Node names drop the ".go" suffix.
-	if got := v.Outs("a"); !reflect.DeepEqual(got, []string{"b"}) {
-		t.Errorf("Outs(a) = %v, want [b]", got)
+	// Node names drop the ".go" suffix. a.go uses b.go, so the edge points
+	// from the dependency b to the dependent a.
+	if got := v.Outs("b"); !reflect.DeepEqual(got, []string{"a"}) {
+		t.Errorf("Outs(b) = %v, want [a]", got)
 	}
-	if got := v.Outs("b"); len(got) != 0 {
-		t.Errorf("Outs(b) = %v, want none", got)
+	if got := v.Outs("a"); len(got) != 0 {
+		t.Errorf("Outs(a) = %v, want none", got)
 	}
 }
 
@@ -280,8 +281,9 @@ func TestBuildGraph_dedupsAcrossPasses(t *testing.T) {
 	if v.Len() != 2 {
 		t.Fatalf("nodes = %d, want 2 (a.go merged): %+v", v.Len(), g.Nodes)
 	}
-	if got := v.Outs("a_test"); !reflect.DeepEqual(got, []string{"a"}) {
-		t.Errorf("Outs(a_test) = %v, want [a]", got)
+	// a_test.go uses a.go, so the edge points from a to a_test.
+	if got := v.Outs("a"); !reflect.DeepEqual(got, []string{"a_test"}) {
+		t.Errorf("Outs(a) = %v, want [a_test]", got)
 	}
 }
 

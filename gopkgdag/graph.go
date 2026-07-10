@@ -9,10 +9,11 @@ import (
 
 // BuildGraph builds the package dependency graph of pkgs. The graph is
 // titled with the module path. Each package is a node named by its import
-// path and commented with its package name; each edge is an import from one
-// package to another package that is also in pkgs. Imports outside pkgs
-// (standard library, external modules) are omitted. Nodes and edges are
-// emitted in import-path order.
+// path and commented with its package name. Each edge points from an
+// imported package to the package that imports it (dependency to
+// dependent), so the graph flows from leaf packages upward. Imports outside
+// pkgs (standard library, external modules) are omitted. Nodes and edges
+// are emitted in import-path order.
 func BuildGraph(pkgs []*packages.Package) (*graph.Graph, error) {
 	var sorted []*packages.Package
 	for _, p := range pkgs {
@@ -49,7 +50,8 @@ func BuildGraph(pkgs []*packages.Package) (*graph.Graph, error) {
 		}
 		sort.Strings(imps)
 		for _, imp := range imps {
-			if err := b.AddEdge(p.PkgPath, imp); err != nil {
+			// Edge points from the dependency to the dependent.
+			if err := b.AddEdge(imp, p.PkgPath); err != nil {
 				return nil, err
 			}
 		}

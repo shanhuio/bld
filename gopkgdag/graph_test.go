@@ -46,12 +46,19 @@ func TestBuildGraph_intraModuleEdges(t *testing.T) {
 	if n := v.Node("m/a"); n == nil || n.Comment != "a" {
 		t.Errorf("node m/a = %+v, want comment a", n)
 	}
-	// Edges to fmt are dropped; only intra-set edges remain, sorted.
-	if got := v.Outs("m/a"); !reflect.DeepEqual(got, []string{"m/b", "m/c"}) {
-		t.Errorf("Outs(m/a) = %v, want [m/b m/c]", got)
+	// m/a imports m/b and m/c (fmt is dropped). Edges point from the
+	// dependency to the dependent, so m/b -> m/a and m/c -> m/a.
+	if got := v.Outs("m/b"); !reflect.DeepEqual(got, []string{"m/a"}) {
+		t.Errorf("Outs(m/b) = %v, want [m/a]", got)
 	}
-	if got := v.Outs("m/b"); len(got) != 0 {
-		t.Errorf("Outs(m/b) = %v, want none", got)
+	if got := v.Outs("m/c"); !reflect.DeepEqual(got, []string{"m/a"}) {
+		t.Errorf("Outs(m/c) = %v, want [m/a]", got)
+	}
+	if got := v.Outs("m/a"); len(got) != 0 {
+		t.Errorf("Outs(m/a) = %v, want none", got)
+	}
+	if got := v.Ins("m/a"); !reflect.DeepEqual(got, []string{"m/b", "m/c"}) {
+		t.Errorf("Ins(m/a) = %v, want [m/b m/c]", got)
 	}
 }
 
