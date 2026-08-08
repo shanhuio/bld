@@ -34,7 +34,7 @@ image_build {
 
 download {
     Name: "download_golang",
-    URL: "https://go.dev/dl/go1.26.4.src.tar.gz",
+    URL: "https://go.dev/dl/go1.26.5.src.tar.gz",
     Checksum: "sha256:495be4bc87176ac567392e5b4116abd98466d33d7b49d41e764ccc6976b2dc42",
     Output: "go-src.tgz",
 }
