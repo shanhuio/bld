@@ -1,8 +1,8 @@
 module shanhu.io/bld
 
-go 1.26.0
+go 1.27.0
 
-toolchain go1.26.6
+toolchain go1.27.3
 
 require (
 	golang.org/x/tools v0.52.0
