@@ -1,6 +1,6 @@
 image_pull {
     Name: "alpine",
-    Pull: "alpine:3.24.1",
+    Pull: "alpine:3.24.3",
 }
 
 image_build {
@@ -29,13 +29,13 @@ image_build {
     ],
     PrefixDir: ".",
     // See https://www.npmjs.com/package/npm
-    Args: ["NPM_VERSION=12.0.2"],
+    Args: ["NPM_VERSION=12.2.1"],
 }
 
 download {
     Name: "download_golang",
-    URL: "https://go.dev/dl/go1.26.6.src.tar.gz",
-    Checksum: "sha256:a0721c54c688901448d77ad9b3ec7ea7c474730755ff891382e92ecb93ff2cb1",
+    URL: "https://go.dev/dl/go1.27.3.src.tar.gz",
+    Checksum: "sha256:6e7749035cf360f06b2575d162ea79df9fda8ef671889e5c375f8e50777f26bb",
     Output: "go-src.tgz",
 }
 
